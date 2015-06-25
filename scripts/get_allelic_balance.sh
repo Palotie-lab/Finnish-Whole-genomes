@@ -33,7 +33,7 @@ echo "file $opt_f"
 echo "norm $opt_n"
 
 
-if [ "$already_normalized" = "1" ];
+if [ "$already_normalized" -ne 0 ];
 then
 
 	bcftools query -f "%ID[\t%GT:%AD]\n" $infile | awk 'BEGIN{ FS="\t"; OFS="\t"; print "ID","N","N_HET","N_DEV_20_80","PROP_DEV_20_80"} { n_dev=0; n_hets=0; n_nonmissing=0;for(i=2; i<=NF;i++) { split($i,dat,":"); if(dat[1]!="./.") { n_nonmissing+=1} if(dat[1]=="1/0"||dat[1]=="0/1" ) { n_hets+=1; split(dat[2],ab,","); balance=0; if(ab[1]+ab[2]>0) { balance=ab[1]/(ab[1]+ab[2]);} if(balance<0.2 || balance>0.8) n_dev+=1 } } prop_dev=0; if(n_called!=0) prop_dev=n_dev/n_called; print $1,n_nonmissing,n_hets,n_dev, prop_dev;  }'
