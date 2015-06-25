@@ -17,7 +17,6 @@ infile=$opt_f
 
 reference_seq="/humgen/1kg/reference/human_g1k_v37.fasta"
 
-## set to true or false depending on if multiallelics have been split or not in vcf
 already_normalized=$opt_n
 
 
@@ -28,9 +27,6 @@ then
 	printer="zcat"
 fi
 
-
-echo "file $opt_f"
-echo "norm $opt_n"
 
 
 if [ "$already_normalized" -ne 0 ];
