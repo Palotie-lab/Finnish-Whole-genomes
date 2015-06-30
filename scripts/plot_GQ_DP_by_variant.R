@@ -60,9 +60,9 @@ a <- strsplit(as.character(dnames[1,]),"]")
 
 print("Reading data")
 d1 <- fread(paste0(inD,"_SNP_EX.txt"), header=F, stringsAsFactor=F)
-d2 <- fread(paste0(inD,"_SNP_NEX.txt"), header=F, stringsAsFactor=F)
+d2 <- fread(paste0(inD,"_SNP_WG.txt"), header=F, stringsAsFactor=F)
 d3 <- fread(paste0(inD,"_INDEL_EX.txt"), header=F, stringsAsFactor=F)
-d4 <- fread(paste0(inD,"_INDEL_NEX.txt"), header=F, stringsAsFactor=F)
+d4 <- fread(paste0(inD,"_INDEL_WG.txt"), header=F, stringsAsFactor=F)
 
 colnames(d1) <- sapply(a[2:length(a)],"[[",2)
 colnames(d2) <- sapply(a[2:length(a)],"[[",2)
@@ -85,11 +85,11 @@ png(paste0(outD,"DP_by_variant.png"), width=1200, height=800, type="cairo")
 
 p1 <- ggplot(aes(x = DP), data=newdata1) + geom_histogram() +ylab("Density") + xlab("Average Sequencing Depth (truncated to 100)") + ggtitle("Average Sequencing Depth per variant - SNPs, EXOMES") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata1$DP),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata1$DP),colour="yellow", linetype=1)
 
-p2 <- ggplot(aes(x = DP), data=newdata2) + geom_histogram() +ylab("Density") + xlab("Average Sequencing Depth (truncated to 100)") + ggtitle("Average Sequencing Depth per variant  - SNPs, NON EXOMES") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata2$DP),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata2$DP),colour="yellow", linetype=1)
+p2 <- ggplot(aes(x = DP), data=newdata2) + geom_histogram() +ylab("Density") + xlab("Average Sequencing Depth (truncated to 100)") + ggtitle("Average Sequencing Depth per variant  - SNPs, WG") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata2$DP),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata2$DP),colour="yellow", linetype=1)
 
 p3 <- ggplot(aes(x = DP), data=newdata3) + geom_histogram() +ylab("Density") + xlab("Average Sequencing Depth (truncated to 100)") + ggtitle("Average Sequencing Depth per variant  - INDELs, EXOMES") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata3$DP),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata3$DP),colour="yellow", linetype=1)
 
-p4 <- ggplot(aes(x = DP), data=newdata4) + geom_histogram() +ylab("Density") + xlab("Average Sequencing Depth (truncated to 100)") + ggtitle("Average Sequencing Depth per variant  - INDELs, NON EXOMES") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata4$DP),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata4$DP),colour="yellow", linetype=1)
+p4 <- ggplot(aes(x = DP), data=newdata4) + geom_histogram() +ylab("Density") + xlab("Average Sequencing Depth (truncated to 100)") + ggtitle("Average Sequencing Depth per variant  - INDELs, WG") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata4$DP),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata4$DP),colour="yellow", linetype=1)
 
 multiplot(p1, p2, p3, p4, cols = 2)
 
@@ -100,11 +100,11 @@ png(paste0(outD,"GQ_MEAN_by_variant.png"), width=1200, height=800, type="cairo")
 
 p1 <- ggplot(aes(x=GQ), data=newdata1) + geom_histogram() +ylab("Density") + xlab("Mean GQ (truncated to 100)") + ggtitle("Mean GQ per variant - SNPs, EXOMES") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata1$GQ),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata1$GQ),colour="yellow", linetype=1)
 
-p2 <- ggplot(aes(x = GQ), data=newdata2) + geom_histogram() +ylab("Density") + xlab("Mean GQ (truncated to 100)") + ggtitle("Mean GQ per variant - SNPs, NON EXOMES") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata2$GQ),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata2$GQ),colour="yellow", linetype=1)
+p2 <- ggplot(aes(x = GQ), data=newdata2) + geom_histogram() +ylab("Density") + xlab("Mean GQ (truncated to 100)") + ggtitle("Mean GQ per variant - SNPs, WG") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata2$GQ),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata2$GQ),colour="yellow", linetype=1)
 
 p3 <- ggplot(aes(x = GQ), data=newdata3) + geom_histogram() +ylab("Density") + xlab("Mean GQ (truncated to 100)") + ggtitle("Mean GQ per variant - INDELs, EXOMES") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata3$GQ),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata3$GQ),colour="yellow", linetype=1)
 
-p4 <- ggplot(aes(x = GQ), data=newdata4) + geom_histogram() +ylab("Density") + xlab("Mean GQ (truncated to 100)") + ggtitle("Mean GQ per variant - INDELs, NON EXOMES") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata4$GQ),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata4$GQ),colour="yellow", linetype=1)
+p4 <- ggplot(aes(x = GQ), data=newdata4) + geom_histogram() +ylab("Density") + xlab("Mean GQ (truncated to 100)") + ggtitle("Mean GQ per variant - INDELs, WG") + xlim(c(0,100)) + geom_vline(xintercept=mean(newdata4$GQ),colour="yellow", linetype=2) + geom_vline(xintercept=median(newdata4$GQ),colour="yellow", linetype=1)
 
 
 multiplot(p1, p2, p3, p4, cols = 2)
@@ -114,13 +114,13 @@ dev.off()
 
 png(paste0(outD,"DP_by_GQ_by_variant.png"), width=1200, height=800, type="cairo")
 
-p1 <- ggplot(data=newdata1,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 500") + ylab("DP - limited to 200") + ylim(c(0,200)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - SNPs, EXOMES") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,500))
+p1 <- ggplot(data=newdata1,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 500") + ylab("DP - limited to 100") + ylim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - SNPs, EXOMES") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,500))
 
-p2 <- ggplot(data=newdata2,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 500") + ylab("DP - limited to 200") + ylim(c(0,200)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - SNPs, NON EXOMES") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,500))
+p2 <- ggplot(data=newdata2,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 500") + ylab("DP - limited to 100") + ylim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - SNPs, WG") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,500))
 
-p3 <- ggplot(data=newdata3,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 500") + ylab("DP - limited to 200") + ylim(c(0,200)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - INDELs, EXOMES") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,500))
+p3 <- ggplot(data=newdata3,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 500") + ylab("DP - limited to 100") + ylim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - INDELs, EXOMES") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,500))
 
-p4 <- ggplot(data=newdata4,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 500") + ylab("DP - limited to 200") + ylim(c(0,200)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - INDELs, NON EXOMES") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,500))
+p4 <- ggplot(data=newdata4,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 500") + ylab("DP - limited to 100") + ylim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - INDELs, WG") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,500))
 
 
 multiplot(p1, p2, p3, p4, cols = 2)

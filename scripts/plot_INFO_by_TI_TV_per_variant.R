@@ -52,15 +52,16 @@ inD = as.character(args[1])
 outD = as.character(args[2])
 NIND = as.numeric(args[3])
 
-#inD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/G77318RH_table"
-#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/plots/"
+#inD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/INFO_G77318RH"
+#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
+#NIND=597
 
 # Read data
 dnames <- read.table(paste0(inD,"_SNP_EX.txt"), header=F, comment.char = "&",nrows=1, stringsAsFactor=F)
 a <- strsplit(as.character(dnames[1,]),"]")
 
 d1 <- fread(paste0(inD,"_SNP_EX.txt"), header=F, stringsAsFactor=F)
-d2 <- fread(paste0(inD,"_SNP_NEX.txt"), header=F, stringsAsFactor=F)
+d2 <- fread(paste0(inD,"_SNP_WG.txt"), header=F, stringsAsFactor=F)
 
 colnames(d1) <- sapply(a[2:length(a)],"[[",2)
 colnames(d2) <- sapply(a[2:length(a)],"[[",2)
@@ -85,7 +86,7 @@ d2$tv <- ifelse((d2$REF=='A' & d2$ALT=='T') | (d2$REF=='G' & d2$ALT=='T')
 DPti_tv_SNP_EX <- NULL
 DPti_tv_SNP_NEX <- NULL
 
-for (i in seq(1:100))
+for (i in seq(5:100))
 {
 	ti_tv_SNP_EX <- sum(d1$ts[d1$DP/NIND < i],na.rm=T)/sum(d1$tv[d1$DP/NIND < i],na.rm=T)
 	ti_tv_SNP_NEX <- sum(d2$ts[d2$DP/NIND < i],na.rm=T)/sum(d2$tv[d2$DP/NIND < i],na.rm=T)
@@ -121,9 +122,24 @@ for (i in seq(0,1,0.01))
 }
 
 
+ACti_tv_SNP_EX <- NULL
+ACti_tv_SNP_NEX <- NULL
 
-newdata1DP <- data.frame(DP=DPti_tv_SNP_EX,x=seq(1:100))
-newdata2DP <- data.frame(DP=DPti_tv_SNP_NEX,x=seq(1:100))
+for (i in seq(1,10,1))
+{
+	ti_tv_SNP_EX <- sum(d1$ts[d1$AC <= i],na.rm=T)/sum(d1$tv[d1$AC <= i],na.rm=T)
+	ti_tv_SNP_NEX <- sum(d2$ts[d2$AC <= i],na.rm=T)/sum(d2$tv[d2$AC <= i],na.rm=T)
+
+	ACti_tv_SNP_EX <- c(ACti_tv_SNP_EX,ti_tv_SNP_EX)
+	ACti_tv_SNP_NEX <- c(ACti_tv_SNP_NEX,ti_tv_SNP_NEX)
+}
+
+
+
+
+
+newdata1DP <- data.frame(DP=DPti_tv_SNP_EX,x=seq(5:100))
+newdata2DP <- data.frame(DP=DPti_tv_SNP_NEX,x=seq(5:100))
 
 newdata1VQSLOD <- data.frame(VQSLOD=VQSLODti_tv_SNP_EX, x=seq(quantile(d1$VQSLOD,0.1),quantile(d1$VQSLOD,0.9),0.1))
 newdata2VQSLOD <- data.frame(VQSLOD=VQSLODti_tv_SNP_NEX,x=seq(quantile(d1$VQSLOD,0.1),quantile(d1$VQSLOD,0.9),0.1))
@@ -131,15 +147,17 @@ newdata2VQSLOD <- data.frame(VQSLOD=VQSLODti_tv_SNP_NEX,x=seq(quantile(d1$VQSLOD
 newdata1AF <- data.frame(AF=AFti_tv_SNP_EX, x=seq(0,1,0.01))
 newdata2AF <- data.frame(AF=AFti_tv_SNP_NEX, x=seq(0,1,0.01))
 
+newdata1AC <- data.frame(AC=ACti_tv_SNP_EX, x=seq(1,10,1))
+newdata2AC <- data.frame(AC=ACti_tv_SNP_NEX, x=seq(1,10,1))
 
 
 png(paste0(outD,"TI_TV_by_DP.png"), width=1200, height=800, type="cairo")
 
-p1a <- ggplot(aes(x = x, y=DP), data=newdata1DP) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("Average DP by Ti/Tv - SNPs, EXOMES") + xlim(c(0,100)) + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm"))
-p2a <- ggplot(aes(x=DP/NIND), data=d1) + geom_histogram() + xlab("Average DP") + ylab("Count") + ggtitle("") + xlim(c(0,100)) + theme( plot.margin=unit(c(-0.5,0.5,0.5,0), "cm"))
+p1a <- ggplot(aes(x = x, y=DP), data=newdata1DP) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("Average DP < x by Ti/Tv - SNPs, EXOMES") + xlim(c(0,100)) + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm"))
+p2a <- ggplot(aes(x=DP/NIND), data=d1) + geom_histogram() + xlab("Average DP") + ylab("Count") + ggtitle("") + xlim(c(5,100)) + theme( plot.margin=unit(c(-0.5,0.5,0.5,0), "cm"))
 
-p1b <- ggplot(aes(x = x, y=DP), data=newdata2DP) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("Average DP by Ti/Tv - SNPs, NON EXOMES") + xlim(c(0,100)) + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm"))
-p2b <- ggplot(aes(x=DP/NIND), data=d2) + geom_histogram() + xlab("Average DP") + ylab("Count") + ggtitle("") + xlim(c(0,100)) + theme( plot.margin=unit(c(-0.5,0.5,0.5,0), "cm"))
+p1b <- ggplot(aes(x = x, y=DP), data=newdata2DP) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("Average DP < x by Ti/Tv - SNPs, WG") + xlim(c(0,100)) + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm"))
+p2b <- ggplot(aes(x=DP/NIND), data=d2) + geom_histogram() + xlab("Average DP") + ylab("Count") + ggtitle("") + xlim(c(5,100)) + theme( plot.margin=unit(c(-0.5,0.5,0.5,0), "cm"))
 
 grid.arrange(p1a, p1b, p2a,  p2b, heights=c(2/3, 1/3), ncol=2)
 
@@ -149,10 +167,10 @@ dev.off()
 
 png(paste0(outD,"TI_TV_by_VQSLOD.png"), width=1200, height=800, type="cairo")
 
-p1a <- ggplot(aes(x = x, y=VQSLOD), data=newdata1VQSLOD) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("VQSLOD by Ti/Tv - SNPs, EXOMES") + xlim(quantile(d1$VQSLOD,0.1),quantile(d1$VQSLOD,0.9)) + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm"))
+p1a <- ggplot(aes(x = x, y=VQSLOD), data=newdata1VQSLOD) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("VQSLOD < x by Ti/Tv - SNPs, EXOMES") + xlim(quantile(d1$VQSLOD,0.1),quantile(d1$VQSLOD,0.9)) + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm"))
 p2a <- ggplot(aes(x=VQSLOD), data=d1) + geom_histogram() + xlab("VQSLOD") + ylab("Count") + ggtitle("") + xlim(quantile(d1$VQSLOD,0.1),quantile(d1$VQSLOD,0.9)) + theme( plot.margin=unit(c(0.5,0.5,0.5,0), "cm"))
 
-p1b <- ggplot(aes(x = x, y=VQSLOD), data=newdata2VQSLOD) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("VQSLOD by Ti/Tv - SNPs, NO EXOMES") + xlim(quantile(d2$VQSLOD,0.1),quantile(d2$VQSLOD,0.9)) + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm"))
+p1b <- ggplot(aes(x = x, y=VQSLOD), data=newdata2VQSLOD) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("VQSLOD < x by Ti/Tv - SNPs, WG") + xlim(quantile(d2$VQSLOD,0.1),quantile(d2$VQSLOD,0.9)) + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm"))
 p2b <- ggplot(aes(x=VQSLOD), data=d2) + geom_histogram() + xlab("VQSLOD") + ylab("Count") + ggtitle("") + xlim(quantile(d2$VQSLOD,0.1),quantile(d2$VQSLOD,0.9)) + theme( plot.margin=unit(c(0.5,0.5,0.5,0), "cm"))
 
 grid.arrange(p1a, p1b, p2a,  p2b, heights=c(2/3, 1/3), ncol=2)
@@ -162,11 +180,26 @@ dev.off()
 
 png(paste0(outD,"TI_TV_by_AF.png"), width=1200, height=800, type="cairo")
 
-p1a <- ggplot(aes(x = x, y=AF), data=newdata1AF) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("AF by Ti/Tv - SNPs, EXOMES") + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm")) + xlim(c(0,1)) + scale_x_log10()
-p2a <- ggplot(aes(x=AF), data=d1) + geom_histogram() + xlab("AF") + ylab("Count") + ggtitle("")  + theme( plot.margin=unit(c(0.5,0.5,0.5,0), "cm")) + xlim(c(0,1)) + scale_x_log10()
+p1a <- ggplot(aes(x = x, y=AF), data=newdata1AF) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("AF by Ti/Tv - SNPs, EXOMES") + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm")) + xlim(c(0,1))
+p2a <- ggplot(aes(x=AF), data=d1) + geom_histogram() + xlab("AF") + ylab("Count") + ggtitle("")  + theme( plot.margin=unit(c(0.5,0.5,0.5,0), "cm")) + xlim(c(0,1)) 
 
-p1b <- ggplot(aes(x = x, y=AF), data=newdata2AF) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("AF by Ti/Tv - SNPs, NO EXOMES")  + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm")) + xlim(c(0,1)) + scale_x_log10()
-p2b <- ggplot(aes(x=AF), data=d2) + geom_histogram() + xlab("AF") + ylab("Count") + ggtitle("") + theme( plot.margin=unit(c(0.5,0.5,0.5,0), "cm")) + xlim(c(0,1)) + scale_x_log10()
+p1b <- ggplot(aes(x = x, y=AF), data=newdata2AF) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("AF by Ti/Tv - SNPs, WG")  + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm")) + xlim(c(0,1))
+p2b <- ggplot(aes(x=AF), data=d2) + geom_histogram() + xlab("AF") + ylab("Count") + ggtitle("") + theme( plot.margin=unit(c(0.5,0.5,0.5,0), "cm")) + xlim(c(0,1)) 
+
+grid.arrange(p1a, p1b, p2a,  p2b, heights=c(2/3, 1/3), ncol=2)
+
+dev.off()
+
+
+newdata1ACT <- data.frame(x=table(d1$AC)[1:10], y=1:10)
+newdata2ACT <- data.frame(x=table(d2$AC)[1:10], y=1:10)
+png(paste0(outD,"TI_TV_by_AC.png"), width=1200, height=800, type="cairo")
+
+p1a <- ggplot(aes(x = x, y=AC), data=newdata1AC) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("AC < x by Ti/Tv - SNPs, EXOMES") + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm")) 
+p2a <- ggplot(aes(y=x,x=y), data=newdata1ACT) + geom_bar(stat="identity") + xlab("AC (truncated to 10)") + ylab("Count") + ggtitle("")  + theme( plot.margin=unit(c(0.5,0.5,0.5,0), "cm")) 
+
+p1b <- ggplot(aes(x = x, y=AC), data=newdata2AC) + geom_point(color="red", size=3) + xlab("") + ylab("Ti/Tv") + ggtitle("AC < x by Ti/Tv - SNPs, WG")  + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm")) 
+p2b <- ggplot(aes(y=x,x=y), data=newdata2ACT) + geom_bar(stat="identity") + xlab("AC (truncated to 10)") + ylab("Count") + ggtitle("")  + theme( plot.margin=unit(c(0.5,0.5,0.5,0), "cm"))
 
 grid.arrange(p1a, p1b, p2a,  p2b, heights=c(2/3, 1/3), ncol=2)
 

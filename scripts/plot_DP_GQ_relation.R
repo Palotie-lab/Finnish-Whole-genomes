@@ -48,24 +48,26 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 args <- commandArgs(trailingOnly = TRUE)
 inD1 = as.character(args[1])
 inD2 = as.character(args[2])
-outD = as.character(args[3])
+inD2 = as.character(args[3])
+outD = as.character(args[4])
 
 #inD1="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/DPgt30"
 #inD2="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/GQgt20byDP"
-#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/plots/"
+#inD3="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/Gqgt20dplt10"
+#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
 
 # Read data
 d1DP30 <- fread(paste0(inD1,"_SNP_EX.txt"), header=F, stringsAsFactor=F)
 d1GQ20byDP <- data.frame(fread(paste0(inD2,"_SNP_EX.txt"), header=F, stringsAsFactor=F))
 
-d2DP30 <- fread(paste0(inD1,"_SNP_NEX.txt"), header=F, stringsAsFactor=F)
-d2GQ20byDP <- data.frame(fread(paste0(inD2,"_SNP_NEX.txt"), header=F, stringsAsFactor=F))
+d2DP30 <- fread(paste0(inD1,"_SNP_WG.txt"), header=F, stringsAsFactor=F)
+d2GQ20byDP <- data.frame(fread(paste0(inD2,"_SNP_WG.txt"), header=F, stringsAsFactor=F))
 
 d3DP30 <- fread(paste0(inD1,"_INDEL_EX.txt"), header=F, stringsAsFactor=F)
 d3GQ20byDP <- data.frame(fread(paste0(inD2,"_INDEL_EX.txt"), header=F, stringsAsFactor=F))
 
-d4DP30 <- fread(paste0(inD1,"_INDEL_NEX.txt"), header=F, stringsAsFactor=F)
-d4GQ20byDP <- data.frame(fread(paste0(inD2,"_INDEL_NEX.txt"), header=F, stringsAsFactor=F))
+d4DP30 <- fread(paste0(inD1,"_INDEL_WG.txt"), header=F, stringsAsFactor=F)
+d4GQ20byDP <- data.frame(fread(paste0(inD2,"_INDEL_WG.txt"), header=F, stringsAsFactor=F))
 
 
 d1GQ20byDP["V1"] <- NULL
@@ -91,22 +93,57 @@ png(paste0(outD,"DP_gt_30_by_sample.png"), width=1200, height=800, type="cairo")
 
 p1 <- ggplot(aes(y = y, x=1:nrow(newdata1DP30)), data=newdata1DP30) + geom_point(color="red", alpha=0.8, size=4) +xlab("Samples") + ylab("% of variants > 30x") + ggtitle("% of variants > 30x - SNPs, EXOMES") + ylim(0,1) + geom_hline(yintercept=mean(newdata1DP30$y),colour="yellow", linetype=1)
 
-p2 <- ggplot(aes(y = y, x=1:nrow(newdata2DP30)), data=newdata2DP30) + geom_point(color="red", alpha=0.8, size=4) +xlab("Samples") + ylab("% of variants > 30x") + ggtitle("% of variants > 30x - SNPs, NON EXOMES") + ylim(0,1) + geom_hline(yintercept=mean(newdata2DP30$y),colour="yellow", linetype=1)
+p2 <- ggplot(aes(y = y, x=1:nrow(newdata2DP30)), data=newdata2DP30) + geom_point(color="red", alpha=0.8, size=4) +xlab("Samples") + ylab("% of variants > 30x") + ggtitle("% of variants > 30x - SNPs, WG") + ylim(0,1) + geom_hline(yintercept=mean(newdata2DP30$y),colour="yellow", linetype=1)
 
 p3 <- ggplot(aes(y = y, x=1:nrow(newdata3DP30)), data=newdata3DP30) + geom_point(color="red", alpha=0.8, size=4) +xlab("Samples") + ylab("% of variants > 30x") + ggtitle("% of variants > 30x - INDELs, EXOMES") + ylim(0,1) + geom_hline(yintercept=mean(newdata3DP30$y),colour="yellow", linetype=1)
 
-p4 <- ggplot(aes(y = y, x=1:nrow(newdata4DP30)), data=newdata4DP30) + geom_point(color="red", alpha=0.8, size=4) +xlab("Samples") + ylab("% of variants > 30x") + ggtitle("% of variants > 30x - INDELs, NON EXOMES") + ylim(0,1) + geom_hline(yintercept=mean(newdata4DP30$y),colour="yellow", linetype=1)
+p4 <- ggplot(aes(y = y, x=1:nrow(newdata4DP30)), data=newdata4DP30) + geom_point(color="red", alpha=0.8, size=4) +xlab("Samples") + ylab("% of variants > 30x") + ggtitle("% of variants > 30x - INDELs, WG") + ylim(0,1) + geom_hline(yintercept=mean(newdata4DP30$y),colour="yellow", linetype=1)
 
 multiplot(p1, p2, p3, p4, cols = 2)
 
 dev.off()
 
 
+library(reshape)
+meltex1 <- melt(d1GQ20byDP)
+meltex2 <- melt(d2GQ20byDP)
+meltex3 <- melt(d3GQ20byDP)
+meltex4 <- melt(d4GQ20byDP)
+
+meltex1$id <- paste0(meltex1$variable,"d1")
+meltex2$id <- paste0(meltex1$variable,"d2")
+meltex3$id <- paste0(meltex1$variable,"d3")
+meltex4$id <- paste0(meltex1$variable,"d4")
+
+
+meltex1$x <- rep(seq(1,100),length(d1GQ20byDP))
+meltex2$x <- rep(seq(1,100),length(d2GQ20byDP))
+meltex3$x <- rep(seq(1,100),length(d3GQ20byDP))
+meltex4$x <- rep(seq(1,100),length(d4GQ20byDP))
+
+
+meltex <- rbind(meltex1,meltex3,meltex4)
+
+newdataall <- data.frame(y=meltex$value,x=meltex$x, id=factor(meltex$id), group=factor(c(rep(1,length(d1GQ20byDP)*nrow(d1GQ20byDP)),rep(3,length(d3GQ20byDP)*nrow(d3GQ20byDP)),rep(4,length(d4GQ20byDP)*nrow(d4GQ20byDP)))))
+
+
+
+png(paste0(outD,"GQ_gt_20_by_DP.png"), width=1200, height=800, type="cairo")
+
+p1 <- ggplot(aes(y = y, x=x, group=id), data=newdataall) + geom_line(alpha=0.1,aes(color=group))  + xlab("DP < x") + ylab("% of variants with GQ > 20") + xlim(c(0,100)) + ylim(c(0,1)) + ggtitle("GQ > 20 by DP") + scale_colour_discrete("Group",labels=c("SNPs-EXOMES","SNPs-WG","INDELs EXOMES","INDELs-WG")) + stat_smooth(method="loess",se = FALSE,lwd=2,span = 0.3, aes(group=group), colour="black")
+
+p1
+
+dev.off()
+
+
+
+
 newdataall <- data.frame(y=c(rowMeans(d1GQ20byDP,na.rm=T),rowMeans(d2GQ20byDP,na.rm=T),rowMeans(d3GQ20byDP,na.rm=T),rowMeans(d4GQ20byDP,na.rm=T)),x=c(rep(seq(1,100),4)), group=factor(c(rep(1,100),rep(2,100),rep(3,100),rep(4,100))))
 
 png(paste0(outD,"GQ_gt_20_by_DP.png"), width=1200, height=800, type="cairo")
 
-p1 <- ggplot(aes(y = y, x=x, group=group), data=newdataall) + geom_point(alpha=0.4) + stat_smooth(se = FALSE,lwd=2,span = 0.2, aes(colour=group)) + xlab("DP") + ylab("% of variants with GQ > 20") + xlim(c(0,100)) + ylim(c(0,1)) + ggtitle("GQ > 20 by DP") + scale_colour_discrete("Group",labels=c("SNPs-EXOMES","SNPs-NON EXOMES","INDELs EXOMES","INDELs-NON EXOMES"))
+p1 <- ggplot(aes(y = y, x=x, group=group), data=newdataall) + geom_point(alpha=0.4) + stat_smooth(se = FALSE,lwd=2,span = 0.2, aes(colour=group)) + xlab("DP < x") + ylab("% of variants with GQ > 20") + xlim(c(0,100)) + ylim(c(0,1)) + ggtitle("GQ > 20 by DP") + scale_colour_discrete("Group",labels=c("SNPs-EXOMES","SNPs-WG","INDELs EXOMES","INDELs-WG"))
 
 p1
 

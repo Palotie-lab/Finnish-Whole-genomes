@@ -56,13 +56,13 @@ outD = as.character(args[2])
 st1 <- system(paste0('grep "^ST" ', inD,'_SNP_EX.txt'), intern=TRUE)
 st1m <- do.call(rbind, strsplit(st1,"\t"))
 
-st2 <- system(paste0('grep "^ST" ', inD,'_SNP_NEX.txt'), intern=TRUE)
+st2 <- system(paste0('grep "^ST" ', inD,'_SNP_WG.txt'), intern=TRUE)
 st2m <- do.call(rbind, strsplit(st2,"\t"))
 
 idd3 <- system(paste0('grep "^IDD" ', inD,'_INDEL_EX.txt'), intern=TRUE)
 idd3m <- do.call(rbind, strsplit(idd3,"\t"))
 
-idd4 <- system(paste0('grep "^IDD" ', inD,'_INDEL_NEX.txt'), intern=TRUE)
+idd4 <- system(paste0('grep "^IDD" ', inD,'_INDEL_WG.txt'), intern=TRUE)
 idd4m <- do.call(rbind, strsplit(idd4,"\t"))
 
 
@@ -84,7 +84,7 @@ idddata4$lab[!idddata4$lab%in%c(3*seq(-60/3,60/3))] <- " "
 png(paste0(outD,"base_modifications.png"), width=1200, height=800, type="cairo")
 
 p1 <- ggplot(aes(y=y, x=x), data=stdata1) + geom_bar(stat="identity") +ylab("Count") + xlab("Type") + ggtitle("Base change - SNPs, EXOMES") +theme(axis.text=element_text(size=16,face="bold"))
-p2 <- ggplot(aes(y=y, x=x), data=stdata2) + geom_bar(stat="identity") +ylab("Count") + xlab("Type") + ggtitle("Base change - SNPs, NON EXOMES") +theme(axis.text=element_text(size=16,face="bold"))
+p2 <- ggplot(aes(y=y, x=x), data=stdata2) + geom_bar(stat="identity") +ylab("Count") + xlab("Type") + ggtitle("Base change - SNPs, WG") +theme(axis.text=element_text(size=16,face="bold"))
 
 multiplot(p1, p2, cols = 2)
 
@@ -95,7 +95,7 @@ dev.off()
 png(paste0(outD,"length_indel.png"), width=1200, height=800, type="cairo")
 
 p1 <- ggplot(aes(y=y, x=x), data=idddata3) + geom_bar(stat="identity") +ylab("Count") + xlab("Length deletion - insertion") + ggtitle("Length indel - INDELs, EXOMES") +theme(axis.text=element_text(size=12,face="bold")) + geom_text(aes(label=lab), vjust=-1)
-p2 <- ggplot(aes(y=y, x=x), data=idddata4) + geom_bar(stat="identity") +ylab("Count") + xlab("Length deletion - insertion") + ggtitle("Length indel - INDELs, NON EXOMES") +theme(axis.text=element_text(size=12,face="bold")) + geom_text(aes(label=lab), vjust=-1)
+p2 <- ggplot(aes(y=y, x=x), data=idddata4) + geom_bar(stat="identity") +ylab("Count") + xlab("Length deletion - insertion") + ggtitle("Length indel - INDELs, WG") +theme(axis.text=element_text(size=12,face="bold")) + geom_text(aes(label=lab), vjust=-1)
 
 multiplot(p1, p2, cols = 2)
 

@@ -49,7 +49,7 @@ inD = as.character(args[1])
 outD = as.character(args[2])
 
 #inD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/G77318RH"
-#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/plots/"
+#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
 #NIND=597
 
 
@@ -119,17 +119,22 @@ dev.off()
 
 png(paste0(outD,"missing_by_variant.png"), width=1200, height=800, type="cairo")
 
-p1 <- ggplot(aes(x = MISSL), data=newdata1ac) + geom_bar(aes(y = (..count..)/sum(..count..))) + ylab("Proportion") + xlab("Missing proportion") + ggtitle(paste0("Proportion of missing per variant - SNPs, EXOMES \n N.of variants with missing > 5%=",sum(newdata1ac$MISSL>0.05), "(",round(sum(newdata1ac$MISSL>0.05)/length(newdata1ac$MISSL),5),"%)")) 
+p1 <- ggplot(aes(x = MISSL), data=newdata1ac) + geom_histogram(origin = 0) + ylab("Count on log scale") + xlab("Missing proportion") + ggtitle(paste0("Proportion of missing per variant - SNPs, EXOMES \n N.of variants with missing > 5%=",sum(newdata1ac$MISSL>0.05), "(",round(sum(newdata1ac$MISSL>0.05)/length(newdata1ac$MISSL),5),"%)")) + scale_y_log10(breaks=c(10,100,1000,10000,100000,1000000,10000000),labels=c("10","100","1000","10000","100000","1000000","10000000"))
 
-p2 <- ggplot(aes(x = MISSL), data=newdata2ac) + geom_bar(aes(y = (..count..)/sum(..count..))) +ylab("Proportion") + xlab("Missing proportion") + ggtitle(paste0("Proportion of missing per variant - SNPs, WG \n N.of variants with missing > 5%=",sum(newdata2ac$MISSL>0.05), "(",round(sum(newdata2ac$MISSL>0.05)/length(newdata2ac$MISSL),5),"%)")) 
 
-p3 <- ggplot(aes(x = MISSL), data=newdata3ac) + geom_bar(aes(y = (..count..)/sum(..count..))) +ylab("Proportion") + xlab("Missing proportion") + ggtitle(paste0("Proportion of missing per variant - INDELs, EXOMES \n N.of variants with missing > 5%=",sum(newdata3ac$MISSL>0.05), "(",round(sum(newdata3ac$MISSL>0.05)/length(newdata3ac$MISSL),5),"%)")) 
+p2 <- ggplot(aes(x = MISSL), data=newdata2ac) + geom_histogram(origin = 0) + ylab("Count on log scale") + xlab("Missing proportion") + ggtitle(paste0("Proportion of missing per variant - SNPs, WG \n N.of variants with missing > 5%=",sum(newdata2ac$MISSL>0.05), "(",round(sum(newdata2ac$MISSL>0.05)/length(newdata2ac$MISSL),5),"%)")) + scale_y_log10(breaks=c(10,100,1000,10000,100000,1000000,10000000),labels=c("10","100","1000","10000","100000","1000000","10000000"))
 
-p4 <- ggplot(aes(x = MISSL), data=newdata4ac) + geom_bar(aes(y = (..count..)/sum(..count..))) +ylab("Proportion") + xlab("Missing proportion") + ggtitle(paste0("Proportion of missing per variant - INDELs, WG \n N.of variants with missing > 5%=",sum(newdata4ac$MISSL>0.05), "(",round(sum(newdata4ac$MISSL>0.05)/length(newdata4ac$MISSL),5),"%)")) 
+
+p3 <- ggplot(aes(x = MISSL), data=newdata3ac) + geom_histogram(origin = 0) + ylab("Count on log scale") + xlab("Missing proportion") + ggtitle(paste0("Proportion of missing per variant - INDELs, EXOMES \n N.of variants with missing > 5%=",sum(newdata3ac$MISSL>0.05), "(",round(sum(newdata3ac$MISSL>0.05)/length(newdata3ac$MISSL),5),"%)")) + scale_y_log10(breaks=c(10,100,1000,10000,100000,1000000,10000000),labels=c("10","100","1000","10000","100000","1000000","10000000"))
+
+
+p4 <- ggplot(aes(x = MISSL), data=newdata4ac) + geom_histogram(origin = 0) + ylab("Count on log scale") + xlab("Missing proportion") + ggtitle(paste0("Proportion of missing per variant - INDELs, WG \n N.of variants with missing > 5%=",sum(newdata4ac$MISSL>0.05), "(",round(sum(newdata4ac$MISSL>0.05)/length(newdata4ac$MISSL),5),"%)")) + scale_y_log10(breaks=c(10,100,1000,10000,100000,1000000,10000000),labels=c("10","100","1000","10000","100000","1000000","10000000"))
+
 
 multiplot(p1, p2, p3, p4, cols = 2)
 
 dev.off()
+
 
 
 

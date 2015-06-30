@@ -56,13 +56,16 @@ tabix /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp5.vcf.gz
 ## Extract regions from the WG file
 bcftools norm -D -R  /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp3 $inWGS -Oz -o /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.tempFWG.vcf.gz
 
-
-#bcftools norm -D -R /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp3 /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp5.vcf.gz  -Oz -o /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.tempFC.vcf.gz
-
-
 tabix -f /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.tempFWG.vcf.gz
-#tabix -f /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.tempFC.vcf.gz
 
+java -Xmx68g -jar /home/unix/aganna/GenomeAnalysisTK.jar \
+     -R /humgen/gsa-hpprojects/GATK/bundle/current/b37/human_g1k_v37.fasta \
+     -T GenotypeConcordance \
+     --moltenize \
+     -eval /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.tempFWG.vcf.gz \
+     -comp /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp5.vcf.gz \
+     -o ${outD}_DP_ALL.txt
+         
 for i in {5..40..5}
   do
      eval "java -Xmx68g -jar /home/unix/aganna/GenomeAnalysisTK.jar \
@@ -75,27 +78,6 @@ for i in {5..40..5}
      -o ${outD}_DP_${i}.txt"
  done
 
-
-## Run concordance analysis ##
-
 ## Remove temporary files ##
 rm /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp*
 
-## Identify duplicated regions ##
-#awk '{print $1,$2}' /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6.vcf | uniq -d | sed 's/ /\t/g' > /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6_to_remove
-
-
-## Exclude again problematic regions ##
-#grep -v '^#' /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6.vcf | awk '$4 != "-" && $5 != "-" && $5 != "." { print $1,$2}'  | sed 's/ /\t/g' > /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6_to_select
-
-
-## Remove the duplicated regions ###
-#grep -v -x -f /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6_to_remove /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6_to_select > /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6_to_select2
-
-
-#bgzip -f /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6.vcf
-#tabix /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6.vcf.gz
-
-
-#bcftools norm -D -R  /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6_to_select2 $inWGS -Oz -o /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.tempFWG.vcf.gz
-#bcftools norm -D -R /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6_to_select2 /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp6.vcf.gz  -Oz -o /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.tempFC.vcf.gz
