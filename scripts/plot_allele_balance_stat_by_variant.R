@@ -56,11 +56,17 @@ print("Reading data")
 d1 <- fread(paste0(inD1,"_SNP_EX.txt"), header=T, stringsAsFactor=F)
 d2 <- fread(paste0(inD1,"_SNP_WG.txt"), header=T, stringsAsFactor=F)
 
+d1 <- subset(d1, N_HET > 0)  
+d2 <- subset(d2, N_HET > 0)  
 
 print("Structuring data")
 
 newdata1 <- data.frame(AB=as.numeric(d1$AB), ABP=as.numeric(d1$PROP_DEV_20_80)+0.001, AC=d1$AC, GQ=d1$GQ)
 newdata2 <- data.frame(AB=as.numeric(d2$AB), ABP=as.numeric(d2$PROP_DEV_20_80)+0.001, AC=d2$AC, GQ=d2$GQ)
+
+
+#nrow(newdata1[newdata1$AB < 0.2 | newdata1$AB > 0.8,])
+#nrow(newdata2[newdata2$AB < 0.2 | newdata2$AB > 0.8,])
 
 
 print("Now plotting")

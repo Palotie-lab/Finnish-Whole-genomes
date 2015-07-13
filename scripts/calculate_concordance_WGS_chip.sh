@@ -24,7 +24,7 @@ bcftools query -f "%CHROM\t%POS\t%REF\t%ALT\n" $inWGS > /humgen/atgu1/fs03/wip/a
 
 awk 'NR==FNR{a[$1,$2]=$3 FS $4;next} ($1,$2) in a{print $0, a[$1,$2]}' /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp2 /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp1 | sort -n --key=1,1 --key=2,2  > /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp3
 
-
+### ADD HWE and F-COEFF excessive
 ## ASSIGN CORRECT ALLELES ##
 /home/unix/aganna/plink_linux_x86_64/plink -bfile $inchip \
 --extract range /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp3 \
@@ -39,13 +39,24 @@ awk 'NR==FNR{a[$1,$2]=$3 FS $4;next} ($1,$2) in a{print $0, a[$1,$2]}' /humgen/a
 cat  /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp4.dupvar > /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp3ind
 awk '$2 ~ /^indel/ {print $2 }'  /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp4.bim  >> /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp3ind
 
+## Also exclude those samples with deviating het ##
+/home/unix/aganna/plink_linux_x86_64/plink -bfile /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp4 \
+--het \
+--out /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp5
+
+Rscript /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/HET_exclusion.R
+
 ## And now recode to .vcf ##
 /home/unix/aganna/plink_linux_x86_64/plink -bfile /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp4 \
+--remove /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp_to_exclude \
 --exclude /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp3ind \
 --a1-allele /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp3 6 4 \
 --geno 0.05 \
+--hwe  0.000001 \
 --recode vcf-iid \
 --out /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/.temp5
+
+
 
 
 ## Zip data ##

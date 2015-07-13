@@ -58,7 +58,7 @@ outD = as.character(args[4])
 #inD2="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/TITV_gatkreport_G77318RH"
 #coveD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/measures/meanmedcoverage.csv"
 
-#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/plots/"
+#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
 
 # Read data (COUNT)
 d1 <- read.table(paste0(inD1,"_SNP_EX.txt"), header=T, stringsAsFactor=F)
@@ -127,7 +127,7 @@ newdata2DP <- newdata2DP[order(newdata2DP$mean), ]
 png(paste0(outD,"singeltons_by_sample.png"), width=800, height=800, type="cairo")
 
 p1 <- ggplot(aes(y = single, x=1:nrow(newdata1DP)), data=newdata1DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Singlentons") + ggtitle("N. Singletons - SNPs, EXOMES") + geom_text(aes(label=IDsing)) + scale_colour_gradient(low = "blue", high="red")
-p2 <- ggplot(aes(y = single, x=1:nrow(newdata2DP)), data=newdata1DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) + scale_colour_gradient(low = "blue", high="red") +xlab("Samples ordered by DP") + ylab("N. Singlentons") + ggtitle("N. Singletons - SNPs, WG") + geom_text(aes(label=IDsing))
+p2 <- ggplot(aes(y = single, x=1:nrow(newdata2DP)), data=newdata2DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) + scale_colour_gradient(low = "blue", high="red") +xlab("Samples ordered by DP") + ylab("N. Singlentons") + ggtitle("N. Singletons - SNPs, WG") + geom_text(aes(label=IDsing))
 
 multiplot(p1, p2, cols = 1)
 
@@ -183,10 +183,10 @@ newdata4DP <- newdata4DP[order(newdata4DP$mean), ]
 
 png(paste0(outD,"nVariantLoci_by_sample.png"), width=800, height=800, type="cairo")
 
-p1 <- ggplot(aes(y = variant, x=1:nrow(newdata1DP)), data=newdata1DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Variants") + ggtitle("N. Variants - SNPs, EXOMES") + geom_text(aes(label=IDvariant)) + geom_hline(yintercept=mean(newdata1$variant),colour="yellow", linetype=1) + scale_colour_gradient(low = "blue", high="red")
-p2 <- ggplot(aes(y = variant, x=1:nrow(newdata2DP)), data=newdata2DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Variants") + ggtitle("N. Variants - SNPs, WG") + geom_text(aes(label=IDvariant)) + geom_hline(yintercept=mean(newdata2$variant),colour="yellow", linetype=1) + scale_colour_gradient(low = "blue", high="red")
-p3 <- ggplot(aes(y = variant, x=1:nrow(newdata3DP)), data=newdata3DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Variants") + ggtitle("N. Variants - INDELSs, EXOMES") + geom_text(aes(label=IDvariant)) + geom_hline(yintercept=mean(newdata3$variant),colour="yellow", linetype=1) + scale_colour_gradient(low = "blue", high="red")
-p4 <- ggplot(aes(y = variant, x=1:nrow(newdata4DP)), data=newdata4DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Variants") + ggtitle("N. Variants - INDELSs, WG") + geom_text(aes(label=IDvariant)) + geom_hline(yintercept=mean(newdata4$variant),colour="yellow", linetype=1) + scale_colour_gradient(low = "blue", high="red")
+p1 <- ggplot(aes(y = variant, x=1:nrow(newdata1DP)), data=newdata1DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Non-ref Variants") + ggtitle("N. Non-ref Variants - SNPs, EXOMES") + geom_text(aes(label=IDvariant)) + geom_hline(yintercept=mean(newdata1$variant),colour="yellow", linetype=1) + scale_colour_gradient(low = "blue", high="red")
+p2 <- ggplot(aes(y = variant, x=1:nrow(newdata2DP)), data=newdata2DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Non-ref Variants") + ggtitle("N. Non-ref Variants - SNPs, WG") + geom_text(aes(label=IDvariant)) + geom_hline(yintercept=mean(newdata2$variant),colour="yellow", linetype=1) + scale_colour_gradient(low = "blue", high="red")
+p3 <- ggplot(aes(y = variant, x=1:nrow(newdata3DP)), data=newdata3DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N.  Non-ref Variants") + ggtitle("N. Non-ref Variants - INDELSs, EXOMES") + geom_text(aes(label=IDvariant)) + geom_hline(yintercept=mean(newdata3$variant),colour="yellow", linetype=1) + scale_colour_gradient(low = "blue", high="red")
+p4 <- ggplot(aes(y = variant, x=1:nrow(newdata4DP)), data=newdata4DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Non-ref Variants") + ggtitle("N. Non-ref Variants - INDELSs, WG") + geom_text(aes(label=IDvariant)) + geom_hline(yintercept=mean(newdata4$variant),colour="yellow", linetype=1) + scale_colour_gradient(low = "blue", high="red")
 
 multiplot(p1, p2, p3, p4, cols = 1)
 

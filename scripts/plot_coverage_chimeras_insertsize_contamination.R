@@ -6,6 +6,7 @@
 
 library(ggplot2)
 options(warn=-1)
+library(pastecs)
 
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
@@ -81,6 +82,8 @@ bametrics=function(metads,i)
 	adress <- paste0(metads$dir[i],metads$sample_name[i],".selfSM")
 	ddt <- read.table(adress)
 	contamin <- ddt$V8
+	lik0 <- ddt$V9
+	lik1 <- ddt$V10
 
 	## Chimeras ##
 	adress2 <- paste0(metads$dir[i],metads$sample_name[i],".alignment_summary_metrics")
@@ -108,7 +111,7 @@ bametrics=function(metads,i)
 	meancoverage <- ddt5$MEAN_COVERAGE
 	mediancoverage <- ddt5$MEDIAN_COVERAGE
 
-	return(list(contamin,chimeras,meancoverage,mediancoverage,insert,insertmed))
+	return(list(contamin,chimeras,meancoverage,mediancoverage,insert,insertmed,lik0,lik1))
 }
 
 ## Get measures ##
@@ -120,6 +123,8 @@ chimeras <- unlist(bametricsR[2,])
 meancoverage <- unlist(bametricsR[3,])
 mediancoverage <- unlist(bametricsR[4,])
 medianinsert <- unlist(bametricsR[6,])
+lik0 <- unlist(bametricsR[7,])
+lik1 <- unlist(bametricsR[8,])
 
 write.csv(cbind(metads$sample_name,meancoverage,mediancoverage),file=paste0(outDM,"meanmedcoverage.csv"))
 write.csv(cbind(metads$sample_name,chimeras),file=paste0(outDM,"chimeras.csv"))
@@ -127,24 +132,66 @@ write.csv(cbind(metads$sample_name,contamin),file=paste0(outDM,"contamination.cs
 write.csv(cbind(metads$sample_name,medianinsert),file=paste0(outDM,"medianinsert.csv"))
 
 ## PLOT INSERT SIZE ###
+
+
 inssizels <- NULL
 for(i in 1:length(bametricsR[5,]))
 {
 	t <- cbind(metads$sample_name[i],bametricsR[5,i][[1]],seq(1:length(bametricsR[5,i][[1]])))
+
 	inssizels <- rbind(inssizels,t)
 }
-
 
 newdata1 <- data.frame(group=inssizels[,1],y=as.numeric(inssizels[,2]),x=as.numeric(inssizels[,3]))
 newdata1 <- newdata1[newdata1$x<600,]
 meanins <- aggregate(newdata1$y,list(newdata1$x),median)
 
+# absolute maximum
+maxabs <- meanins$Group.1[which.max(meanins$x)]
+# Region where to search the realtive minimum
+regionofsearch <- meanins$x[meanins$Group.1>200 & meanins$Group.1 < maxabs]
+# Find the relative minumum
+breakpoint <- meanins$Group.1[meanins$x==min(regionofsearch)]-20
 
+# Identify max for each sample in the two regions separated by breakpoint
+MAXREL <- NULL
+for(i in 1:length(bametricsR[5,]))
+{
+	seqT <- seq(1:length(bametricsR[5,i][[1]]))
+	val <- bametricsR[5,i][[1]]
+	max1 <- max(val[seqT < breakpoint])
+	max2 <- max(val[seqT > breakpoint])
+	seqmax1 <- seqT[val==max1]
+	seqmax2 <- seqT[val==max2]
+	MAXREL <- rbind(MAXREL,cbind(metads$sample_name[i],max1,max2,seqmax1,seqmax2))
+}
+
+
+#newdata1$col <- ifelse(newdata1$group%in%c("I-PAL_SPSY_000592_001","I-PAL_FR02_000400_001"),1,10)
 png(paste0(outD,"insert_size_distribution_by_sample.png"), width=800, height=800, type="cairo")
-p1 <- ggplot(aes(y=y,x=x),data=newdata1) + geom_line(aes(group=group), alpha=0.5, colour="red") + xlab("Insert size") +ylab("Count")  + geom_line(aes(y=x,x=Group.1),data=meanins,colour="blue", lwd=2)
+p1 <- ggplot(aes(y=y,x=x),data=newdata1) + geom_line(aes(group=group), alpha=0.5) + xlab("Insert size") +ylab("Count")  + geom_line(aes(y=x,x=Group.1),data=meanins,colour="blue", lwd=2)
 p1
 dev.off()
 
+png(paste0(outD,"insert_size_distribution_ZOOM_by_sample.png"), width=800, height=800, type="cairo")
+p1 <- ggplot(aes(y=y,x=x),data=newdata1) + geom_line(aes(group=group), alpha=0.5) + xlab("Insert size") +ylab("Count")  + geom_line(aes(y=x,x=Group.1),data=meanins,colour="blue", lwd=2) + xlim(c(10,100)) + ylim(c(0,200000))
+p1
+dev.off()
+
+
+#dada <- data.frame(y=as.numeric(c(MAXREL[,2],MAXREL[,3])),x=as.numeric(c(MAXREL[,4],MAXREL[,5])), colox=c(rep("red",nrow(MAXREL)),rep("blue",nrow(MAXREL))))
+#dada <- dada[order(dada$x),]
+
+#png(paste0(outD,"insert_size_distribution_by_sampleMAX.png"), width=800, height=800, type="cairo")
+#p1 <- ggplot(aes(y=y,x=x),data=dada) + geom_point(aes(color=colox), alpha=1, size=4)
+#p1
+#dev.off()
+
+MAXREL <- data.frame(MAXREL,stringsAsFactors=F)
+MAXREL$dfmax1 <- abs(as.numeric(MAXREL$max1)- max(meanins$x[meanins$Group.1<breakpoint]))
+MAXREL$dfmax2 <- abs(as.numeric(MAXREL$max2)-max(meanins$x))	
+
+write.csv(MAXREL,file=paste0(outDM,"insertmaxdiff.csv"),row.names=F)
 
 
 ### PLOT % CHIMERIC ###
@@ -155,7 +202,7 @@ newdata2$ID[newdata2$ID!=newdata2$ID[which.max(newdata2$y)]] <- " "
 
 
 png(paste0(outD,"chimeras_by_sample.png"), width=800, height=800, type="cairo")
-p1 <- ggplot(aes(y = y, x=1:nrow(newdata2)), data=newdata2) + geom_point(size=10, alpha=0.5, colour="red") +xlab("Samples") + ylab("% Chimeric") + geom_text(aes(label=ID))
+p1 <- ggplot(aes(y = y, x=1:nrow(newdata2)), data=newdata2) + geom_point(size=4, alpha=0.8, colour="red") +xlab("Samples") + ylab("% Chimeric") + geom_text(aes(label=ID))
 p1  
 dev.off()
 
@@ -176,11 +223,13 @@ dev.off()
 
 
 ### PLOT % CONTAMINATION ###
-newdata4 <- data.frame(y=contamin,ID=metads$sample_name)
+newdata4 <- data.frame(y=contamin,ID=metads$sample_name, Coverage=meancoverage, loglik=lik1-lik0)
 
 newdata4$ID[newdata4$ID!=newdata4$ID[which.max(newdata4$y)]] <- " "
 
+#newdata4 <- newdata4[order(newdata4$mc),]
+
 png(paste0(outD,"contamination_by_sample.png"), width=800, height=800, type="cairo")
-p1 <- ggplot(aes(y = y, x=1:nrow(newdata4)), data=newdata4) + geom_point(size=10, alpha=0.5, colour="red") +xlab("Samples") + ylab("% Contamination") + geom_text(aes(label=ID))
+p1 <- ggplot(aes(y = y, x=loglik), data=newdata4) + geom_point(size=4, alpha=0.8, aes(color=Coverage)) +xlab("Log-likelihood ratio") + ylab("Estimates of contamination") + geom_text(aes(label=ID))
 p1  
 dev.off()

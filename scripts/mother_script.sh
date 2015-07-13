@@ -35,6 +35,17 @@ tabix ${original}G77318RH.vcf.gz
 #### BAM-LEVEL STATS ####
 #########################
 
+## Get GC content for each .bam file ##
+
+for file in `awk -F $'\t' '{print $5}' /seq/dax/G77318/WGS/v15/G77318.calling_metadata.txt`; do
+bsub -o ${log}gccontent/GC_`basename ${file} .bam`.log -R "rusage[mem=8]" -q week \
+${script}calculate_GC_content.sh \
+${file} \
+${plots}gccontent \
+${temp}gccontent;
+done
+
+
 ## PLOT coverage_chimeras_insertsize_contamination ###
 ## and also save a file with per-sample coverage ###
 
@@ -42,6 +53,13 @@ Rscript ${script}plot_coverage_chimeras_insertsize_contamination.R \
 ${original}G77318RH.vcf.gz \
 /seq/dax/G77318/WGS/v15/G77318.calling_metadata.txt \
 ${plots} ${measure}
+
+## Plot GC content plots ##
+## At the moment run it interactively ##
+Rscript ${script}plot_GC_content.R \
+${temp}gccontent/ \
+${plots} \
+${measure}
 
 
 ###################################################
@@ -105,6 +123,7 @@ bsub -o ${log}G77318RH_het_hardy_miss.log -R "rusage[mem=96]" -q week \
 ${script}calculate_het_hardy_miss.sh \
 /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/G77318RH
 
+
 ## Check concordance with chip data ##
 bsub -o /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/concordance_SNP_EX.log  -R "rusage[mem=98]" -q week \
 ${script}calculate_concordance_WGS_chip.sh \
@@ -113,20 +132,56 @@ ${original}G77318RH.vcf.gz \
 /humgen/atgu1/fs03/wip/aganna/fin_seq/processed/psych/concordance_G77318RH
   
 ## process GQ and DP ##  
-bsub -o ${log}GQ_by_DP.log  -R "rusage[mem=230]" -q week \
-python ${script}calculate_GQ_by_DP.py \
+bsub -o ${log}GQ_by_DP.log  -R "rusage[mem=230]" -q priority \
+python ${script}calculate_GQ_by_DP2.py \
 ${temp}DP_G77318RH.txt \
 ${temp}GQ_G77318RH.txt \
 ${temp}samplenames_G77318RH_INDEL_WG.txt \
 ${temp}
+
+## Allele balance ##
+bsub -o ${log}allele_balance.log  -R "rusage[mem=64]" -q priority \
+bash ${script}calculate_allele_balance.sh \
+-f ${original}G77318RH.vcf.gz -o ${temp}AB_G77318RH.txt
+
+## Run script for average DP and GQ ##
+bsub -o ${log}DP_GQ_DP_mean.log -R "rusage[mem=64]" -q priority \
+${script}calculate_GQ_DP_mean.sh -f ${original}G77318RH.vcf.gz -o${temp}DP_GQ_MEAN_G77318RH.txt
+
+
+## Calculate allele balance and z scores from allele balance calculations ##
+bsub -o ${log}allele_balance_python.log -R "rusage[mem=80]" -q priority \
+python ${script}get_DP_80_20_z_score.py ${original}G77318RH.vcf.gz ${temp} 1000000
+
+#bsub -o ${log}allele_balance_python2.log -R "rusage[mem=30]" -q priority \
+#python ${script}get_DP_80_20_z_score.py ${temp}G77318RH_SNP_EX.vcf.gz ${temp}temp/ 100000
+
+#python ${script}get_DP_80_20_z_score.py /humgen/atgu1/fs03/wip/aganna/fin_seq/original/playdata22.vcf.gz ${temp}temp/ 300
+
 
 
 #######################
 #### KEEP ONLY PASS ###
 #######################
 
-bcftools view -f .,PASS ${original}G77318RH.vcf.gz -Oz -o \
+## Select samples to exclude ##
+#d1 <- read.csv("/humgen/atgu1/fs03/wip/aganna/fin_seq/results/measures/chimeras.csv", stringsAsFactor=F)
+#d1$X.1[d1$chimeras > 0.05]
+
+#d2 <- read.csv("/humgen/atgu1/fs03/wip/aganna/fin_seq/results/measures/contamination.csv", stringsAsFactor=F)
+#d1$X.1[d1$contamin > 0.05]
+
+bcftools view -f .,PASS -S ${original}G77318RH.vcf.gz -Oz -o \
 ${original}G77318RH_PASS.vcf.gz
+
+
+
+# Also do a sex check plot #
+
+bcftools filter -r X ${original}G77318RH_PASS.vcf.gz -Oz -o chrX.vcf.gz
+zcat chrX.vcf.gz | /home/unix/aganna/scripts/x_het.pl  > test.txt
+
+zcat ${original}G77318RH_PASS.vcf.gz | /home/unix/aganna/scripts/y_cov.pl  > test2.txt
 
 
 ######################################
@@ -156,6 +211,21 @@ ${original}G77318RH_PASS.vcf.gz \
 ${temp}G77318RH_INDEL_WG.vcf "INDEL" "NO" 
 
 
+## Save versions without low-complexity regions ##
+bsub -o ${log}low_complexity_G77318RH_INDEL_EX.log -R "rusage[mem=15]" -q week \
+bcftools view -T ^/home/unix/aganna/LCR-hs37d5.bed ${temp}G77318RH_INDEL_EX.vcf.gz -Oz -o ${temp}G77318RH_INDEL_EX_NLC.vcf.gz
+
+bsub -o ${log}low_complexity_G77318RH_INDEL_WG.log -R "rusage[mem=15]" -q week \
+bcftools view -T ^/home/unix/aganna/LCR-hs37d5.bed ${temp}G77318RH_INDEL_WG.vcf.gz -Oz -o ${temp}G77318RH_INDEL_WG_NLC.vcf.gz
+
+bsub -o ${log}low_complexity_G77318RH_SNP_EX.log -R "rusage[mem=15]" -q week \
+bcftools view -T ^/home/unix/aganna/LCR-hs37d5.bed ${temp}G77318RH_SNP_EX.vcf.gz -Oz -o ${temp}G77318RH_SNP_EX_NLC.vcf.gz
+
+bsub -o ${log}low_complexity_G77318RH_SNP_WG.log -R "rusage[mem=15]" -q week \
+bcftools view -T ^/home/unix/aganna/LCR-hs37d5.bed ${temp}G77318RH_SNP_WG.vcf.gz -Oz -o ${temp}G77318RH_SNP_WG_NLC.vcf.gz
+
+
+
 ## Save variants info in tabular format for plotting ##
 ## Obtain three additional file with genotype-specific values ##
 
@@ -180,6 +250,18 @@ ${temp}G77318RH_INDEL_WG.vcf.gz \
 ${temp} G77318RH_INDEL_WG
 
 
+bsub -o ${log}INFO_G77318RH_INDEL_EX_NLC.log -R "rusage[mem=74]" -q week \
+${script}calculate_INFO_genospecific_AD_GT_DP_GQ.sh \
+${temp}G77318RH_INDEL_EX_NLC.vcf.gz \
+${temp} G77318RH_INDEL_EX_NLC
+
+bsub -o ${log}INFO_G77318RH_INDEL_WG_NLC.log -R "rusage[mem=74]" -q week \
+${script}calculate_INFO_genospecific_AD_GT_DP_GQ.sh \
+${temp}G77318RH_INDEL_WG_NLC.vcf.gz \
+${temp} G77318RH_INDEL_WG_NLC
+
+
+
 ## Calculate several metrics based on GQ and DP ##
 bsub -o ${log}GQ_by_DP_SNP_EX.log  -R "rusage[mem=98]" -q week \
 python ${script}calculate_GQ_by_DP.py \
@@ -188,14 +270,14 @@ ${temp}GQ_G77318RH_SNP_EX.txt \
 ${temp}samplenames_G77318RH_SNP_EX.txt \
 ${temp}
 
-bsub -o ${log}GQ_by_DP_SNP_WG.log  -R "rusage[mem=200]" -q week \
+bsub -o ${log}GQ_by_DP_SNP_WG.log  -R "rusage[mem=200]" -q priority \
 python ${script}calculate_GQ_by_DP.py \
 ${temp}DP_G77318RH_SNP_WG.txt \
 ${temp}GQ_G77318RH_SNP_WG.txt \
 ${temp}samplenames_G77318RH_SNP_EX.txt \
 ${temp}
 
-bsub -o ${log}GQ_by_DP_INDEL_EX.log  -R "rusage[mem=98]" -q week \
+bsub -o ${log}GQ_by_DP_INDEL_EX.log  -R "rusage[mem=16]" -q priority \
 python ${script}calculate_GQ_by_DP.py \
 ${temp}DP_G77318RH_INDEL_EX.txt \
 ${temp}GQ_G77318RH_INDEL_EX.txt \
@@ -210,6 +292,24 @@ ${temp}samplenames_G77318RH_INDEL_WG.txt \
 ${temp}
 
 
+bsub -o ${log}GQ_by_DP_INDEL_EX_NLC.log  -R "rusage[mem=16]" -q priority \
+python ${script}calculate_GQ_by_DP.py \
+${temp}DP_G77318RH_INDEL_EX_NLC.txt \
+${temp}GQ_G77318RH_INDEL_EX_NLC.txt \
+${temp}samplenames_G77318RH_INDEL_EX_NLC.txt \
+${temp}
+
+bsub -o ${log}GQ_by_DP_INDEL_WG_NLC.log  -R "rusage[mem=98]" -q week \
+python ${script}calculate_GQ_by_DP.py \
+${temp}DP_G77318RH_INDEL_WG_NLC.txt \
+${temp}GQ_G77318RH_INDEL_WG_NLC.txt \
+${temp}samplenames_G77318RH_INDEL_WG_NLC.txt \
+${temp}
+
+
+
+
+
 ## Run script on allele balance ##
 bash ${script}calculate_allele_balance.sh \
 -f ${temp}G77318RH_SNP_EX.vcf.gz > \
@@ -218,6 +318,48 @@ ${temp}AB_G77318RH_SNP_EX.txt
 bash ${script}calculate_allele_balance.sh \
 -f ${temp}G77318RH_SNP_WG.vcf.gz > \
 ${temp}AB_G77318RH_SNP_WG.txt
+
+
+## Calculate AVERAGE GQ AND DP ##
+bsub -o ${log}DP_GQ_DP_mean_SNP_EX.log -R "rusage[mem=16]" -q priority \
+${script}calculate_GQ_DP_mean.sh -f ${temp}G77318RH_SNP_EX.vcf.gz -o ${temp}DP_GQ_MEAN_G77318RH_SNP_EX.txt
+
+bsub -o ${log}DP_GQ_DP_mean_SNP_WG.log -R "rusage[mem=64]" -q priority \
+${script}calculate_GQ_DP_mean.sh -f ${temp}G77318RH_SNP_WG.vcf.gz -o ${temp}DP_GQ_MEAN_G77318RH_SNP_WG.txt
+
+bsub -o ${log}DP_GQ_DP_mean_INDEL_EX.log -R "rusage[mem=16]" -q priority \
+${script}calculate_GQ_DP_mean.sh -f ${temp}G77318RH_INDEL_EX.vcf.gz -o ${temp}DP_GQ_MEAN_G77318RH_INDEL_EX.txt
+
+bsub -o ${log}DP_GQ_DP_mean_INDEL_WG.log -R "rusage[mem=16]" -q priority \
+${script}calculate_GQ_DP_mean.sh -f ${temp}G77318RH_INDEL_WG.vcf.gz -o ${temp}DP_GQ_MEAN_G77318RH_INDEL_WG.txt
+
+
+bsub -o ${log}DP_GQ_DP_mean_SNP_EX_NLC.log -R "rusage[mem=16]" -q priority \
+${script}calculate_GQ_DP_mean.sh -f ${temp}G77318RH_SNP_EX_NLC.vcf.gz -o ${temp}DP_GQ_MEAN_G77318RH_SNP_EX_NLC.txt
+
+bsub -o ${log}DP_GQ_DP_mean_SNP_WG_NLC.log -R "rusage[mem=64]" -q priority \
+${script}calculate_GQ_DP_mean.sh -f ${temp}G77318RH_SNP_WG_NLC.vcf.gz -o ${temp}DP_GQ_MEAN_G77318RH_SNP_WG_NLC.txt
+
+bsub -o ${log}DP_GQ_DP_mean_INDEL_EX_NLC.log -R "rusage[mem=16]" -q priority \
+${script}calculate_GQ_DP_mean.sh -f ${temp}G77318RH_INDEL_EX_NLC.vcf.gz -o ${temp}DP_GQ_MEAN_G77318RH_INDEL_EX_NLC.txt
+
+bsub -o ${log}DP_GQ_DP_mean_INDEL_WG_NLC.log -R "rusage[mem=16]" -q priority \
+${script}calculate_GQ_DP_mean.sh -f ${temp}G77318RH_INDEL_WG_NLC.vcf.gz -o ${temp}DP_GQ_MEAN_G77318RH_INDEL_WG_NLC.txt
+
+## Calculate average indels lengths ##
+
+bsub -o ${log}indel_length_INDEL_EX.log -R "rusage[mem=16]" -q priority \
+${script}calculate_indel_length.sh -f ${temp}G77318RH_INDEL_EX.vcf.gz -o ${temp}indel_length_G77318RH_INDEL_EX.txt
+
+bsub -o ${log}indel_length_INDEL_WG.log -R "rusage[mem=16]" -q priority \
+${script}calculate_indel_length.sh -f ${temp}G77318RH_INDEL_WG.vcf.gz -o ${temp}indel_length_G77318RH_INDEL_WG.txt
+
+
+bsub -o ${log}indel_length_INDEL_EX_NLC.log -R "rusage[mem=16]" -q priority \
+${script}calculate_indel_length.sh -f ${temp}G77318RH_INDEL_EX_NLC.vcf.gz -o ${temp}indel_length_G77318RH_INDEL_EX_NLC.txt
+
+bsub -o ${log}indel_length_INDEL_WG_NLC.log -R "rusage[mem=16]" -q priority \
+${script}calculate_indel_length.sh -f ${temp}G77318RH_INDEL_WG_NLC.vcf.gz -o ${temp}indel_length_G77318RH_INDEL_WG_NLC.txt
 
 
 
@@ -263,7 +405,7 @@ ${temp}G77318RH_INDEL_WG
 
 
 ### Plot results from plink analysis ###
-bsub -o ${log}plot_het_hardy_miss.log -R "rusage[mem=16]" -q week \
+bsub -o ${log}plot_het_hardy_miss.log -R "rusage[mem=16]" -q priority \
 Rscript ${script}plot_het_hardy_miss.R \
 ${temp}G77318RH \
 ${plots}
@@ -278,8 +420,13 @@ ${plots}
 
 
 ## Plot stats from bcftools report ##
-Rscript ${script}plot_bcftools_stat.R \
+Rscript ${script}plot_base_changes.R \
 ${temp}bcfreport_G77318RH \
+${plots}
+
+## Indels length ##
+Rscript ${script}plot_indel_length.R \
+${temp}indel_length_G77318RH \
 ${plots}
 
 
@@ -291,7 +438,7 @@ ${plots} 597
 ## Plot GQ and DP by variant ##
 Rscript ${script}plot_GQ_DP_by_variant.R \
 ${temp}INFO_G77318RH \
-${plots} 597
+${plots}
  
 
 ## Plot allele balance stats ##
@@ -303,7 +450,6 @@ ${plots}
 Rscript ${script}plot_DP_GQ_relation.R \
 ${temp}DPgt30 \
 ${temp}GQgt20byDP \
-${temp}Gqgt20dplt10 \
 ${plots}
  
     
@@ -348,23 +494,27 @@ for file in ${temp}bafplots/*.gz;
     done
     
    
-bsub -o /home/unix/aganna/AB.log -R "rusage[mem=30]" -q week \
-python /home/unix/aganna/get_DP_80_20_per_sample.py /humgen/atgu1/fs03/wip/aganna/fin_seq/original/seq/G77318RH.vcf.gz /home/unix/aganna/
-
-
-
-for file in `awk -F $'\t' '{print $5}' /seq/dax/G77318/WGS/v15/G77318.calling_metadata.txt`; do
-  echo $file
+for i in `seq -f "%.0f" 1098411 1098458`;do
+echo $i
+bkill ${i};
 done
 
+for i in `seq 10 1 60`; do
+bsub -o /broad/hptmp/aganna/${i}.log -R "rusage[mem=8]" -q hour \
+${script}calculate_GQ20_DP.sh \
+${temp}temp/G77318RH_INDEL_EX_ms.vcf.gz \
+$i;
+done
 
-java -Xmx16g -XX:ParallelGCThreads=12 -jar /home/unix/aganna/picard-tools-1.135/picard.jar \
-CollectGcBiasMetrics \
-INPUT=/seq/picard_aggregation/G77318/I-PAL_FR02_007299_001/v1/I-PAL_FR02_007299_001.bam \
-CHART_OUTPUT=/home/unix/aganna/test.pdf \
-OUTPUT=/home/unix/aganna/test.txt \
-REFERENCE_SEQUENCE=/seq/references/Homo_sapiens_assembly19/v1/Homo_sapiens_assembly19.fasta \
-SUMMARY_OUTPUT=/home/unix/aganna/test2.txt
- 
+cat /broad/hptmp/aganna/GQ20DP_script_*_HET_temp  ${temp}temp/GQ20_DP_HET_EX.txt
+cat /broad/hptmp/aganna/GQ20DP_script_*_ALL_temp  ${temp}temp/GQ20_DP_ALL_EX.txt
 
+for i in `seq 10 1 60`; do
+bsub -o /broad/hptmp/aganna/${i}.log -R "rusage[mem=8]" -q priority \
+${script}calculate_GQ20_DP.sh \
+${temp}temp/G77318RH_INDEL_WG_ms.vcf.gz \
+$i;
+done
 
+cat /broad/hptmp/aganna/GQ20DP_script_*_HET_temp  ${temp}temp/GQ20_DP_HET_WG.txt
+cat /broad/hptmp/aganna/GQ20DP_script_*_ALL_temp  ${temp}temp/GQ20_DP_ALL_WG.txt

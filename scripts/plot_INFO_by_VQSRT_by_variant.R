@@ -50,7 +50,7 @@ inD = as.character(args[1])
 outD = as.character(args[2])
 NIND = as.numeric(args[3])
 
-#inD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/G77318RH.txt"
+#inD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/INFO_G77318RH.txt"
 #outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
 #NIND=597
 
@@ -90,7 +90,7 @@ p3 <- ggplot(aes(x = ReadPosRankSum), data=newdata3) + geom_histogram(aes(fill=g
 
 p4 <- ggplot(aes(x = ReadPosRankSum), data=newdata4) + geom_histogram(aes(fill=group)) +xlab("ReadPosRankSum") + ylab("Number") + ggtitle("ReadPosRankSum by VQSRTranche") 
 
-multiplot(p1,p2,p3,p4, cols=2)
+multiplot(p1,p3,p4,p2, cols=2)
 
 dev.off()
 
@@ -105,7 +105,7 @@ p3 <- ggplot(aes(x = FS), data=newdata3) + geom_histogram(aes(fill=group)) +xlab
 
 p4 <- ggplot(aes(x = FS), data=newdata4) + geom_histogram(aes(fill=group)) +xlab("FS (truncated 300)") + ylab("Number") + ggtitle("FS by VQSRTranche")  + xlim(c(0,300))
 
-multiplot(p1,p2,p3,p4, cols=2)
+multiplot(p1,p3,p4,p2, cols=2)
 
 
 dev.off()
@@ -121,7 +121,7 @@ p3 <- ggplot(aes(x = QD), data=newdata3) + geom_histogram(aes(fill=group)) +xlab
 
 p4 <- ggplot(aes(x = QD), data=newdata4) + geom_histogram(aes(fill=group)) +xlab("QD") + ylab("Number") + ggtitle("QD by VQSRTranche")  
 
-multiplot(p1,p2,p3,p4, cols=2)
+multiplot(p1,p3,p4,p2, cols=2)
 
 dev.off()
 
@@ -136,7 +136,7 @@ p3 <- ggplot(aes(x = MQranksum), data=newdata3) + geom_histogram(aes(fill=group)
 
 p4 <- ggplot(aes(x = MQranksum), data=newdata4) + geom_histogram(aes(fill=group)) +xlab("MQranksum") + ylab("Number") + ggtitle("MQranksum by VQSRTranche")  
 
-multiplot(p1,p2,p3,p4, cols=2)
+multiplot(p1,p3,p4,p2, cols=2)
 
 dev.off()
 
@@ -153,7 +153,7 @@ p3 <- ggplot(aes(x = imbcoef), data=newdata3) + geom_histogram(aes(fill=group)) 
 
 p4 <- ggplot(aes(x = imbcoef), data=newdata4) + geom_histogram(aes(fill=group)) +xlab("Inbreeding Coef") + ylab("Number") + ggtitle("Inbreeding Coef by VQSRTranche")  
 
-multiplot(p1,p2,p3,p4, cols=2)
+multiplot(p1,p3,p4,p2, cols=2)
 
 dev.off()
 
@@ -170,7 +170,7 @@ p3 <- ggplot(aes(x = DP), data=newdata3) + geom_histogram(aes(fill=group)) +xlab
 
 p4 <- ggplot(aes(x = DP), data=newdata4) + geom_histogram(aes(fill=group)) +xlab("DP") + ylab("Number") + ggtitle("DP by VQSRTranche")  
 
-multiplot(p1,p2,p3,p4, cols=2)
+multiplot(p1,p3,p4,p2, cols=2)
 
 dev.off()
 
@@ -186,6 +186,6 @@ p3 <- ggplot(aes(x = imbcoef), data=newdata3) + geom_histogram(aes(fill=group)) 
 
 p4 <- ggplot(aes(x = imbcoef), data=newdata4) + geom_histogram(aes(fill=group)) +xlab("Inbreeding Coef") + ylab("Number") + ggtitle("Inbreeding Coef by VQSRTranche")  
 
-multiplot(p1,p2,p3,p4, cols=2)
+multiplot(p1,p3,p4,p2, cols=2)
 
 dev.off()

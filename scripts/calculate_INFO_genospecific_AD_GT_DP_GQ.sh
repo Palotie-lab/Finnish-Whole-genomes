@@ -33,12 +33,12 @@ bcftools stats $inD > ${outD}bcfreport_${suffixD}.txt
 
 bcftools norm -Ou  -m -any $inD | bcftools query -Hf '%CHROM %POS %ID %REF %ALT %FILTER %AF %QD %DP %MQ %GQ_MEAN %InbreedingCoeff %FS %MQRankSum %ReadPosRankSum %AC %VQSLOD\n'  > ${outD}INFO_${suffixD}.txt
 
-bcftools view -g het -v snps $inD |
-  sed 's/^##FORMAT=<ID=AD,Number=\./##FORMAT=<ID=AD,Number=R/g' |
-  bcftools norm -Ou -m -any |
-  bcftools norm -Ou -f /humgen/1kg/reference/human_g1k_v37.fasta | bcftools query -f "[%GT %AD ]\n" > ${outD}ADGT_${suffixD}.txt
+#bcftools view -g het -v snps $inD |
+#  sed 's/^##FORMAT=<ID=AD,Number=\./##FORMAT=<ID=AD,Number=R/g' |
+#  bcftools norm -Ou -m -any |
+#  bcftools norm -Ou -f /humgen/1kg/reference/human_g1k_v37.fasta | bcftools query -f "[%GT %AD ]\n" > ${outD}ADGT_${suffixD}.txt
 
-nlines=`wc -l ${outD}ADGT_${suffixD}.txt | awk '{print $1}'`
+nlines=`wc -l ${outD}INFO_${suffixD}.txt | awk '{print $1}'`
 
 if [ $nlines -gt 10000000 ]; then
     echo 'Subsampling only 10M rows'

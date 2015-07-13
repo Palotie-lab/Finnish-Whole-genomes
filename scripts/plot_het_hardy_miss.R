@@ -75,7 +75,10 @@ d4b <- read.table(paste0(inD,"_INDEL_WG.het"), header=T, stringsAsFactor=F, blan
 d4c <- read.table(paste0(inD,"_INDEL_WG.imiss"), header=T, stringsAsFactor=F, blank.lines.skip=F)
 d4d <- read.table(paste0(inD,"_INDEL_WG.lmiss"), header=T, stringsAsFactor=F, blank.lines.skip=F)
 
-
+#nrow(d1d[d1d$F_MISS > 0.90,])
+#nrow(d2d[d2d$F_MISS > 0.90,])
+#nrow(d3d[d3d$F_MISS > 0.90,])
+#nrow(d4d[d4d$F_MISS > 0.90,])
 
 newdata1ac <- data.frame(HWE=as.numeric(d1a$P), MISSL=as.numeric(d1d$F_MISS))
 newdata1bd <- data.frame(HET=as.numeric(d1b$F), MISSI=as.numeric(d1c$F_MISS), IDH=d1c$FID,IDM=d1c$FID)
