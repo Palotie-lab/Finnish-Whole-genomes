@@ -52,10 +52,10 @@ metadataD = as.character(args[2])
 outD= as.character(args[3])
 outDM = as.character(args[4])
 
-#origvcfD="/humgen/atgu1/fs03/wip/aganna/fin_seq/original/seq/G77318RH.vcf.gz"
-#metadataD="/seq/dax/G77318/WGS/v15/G77318.calling_metadata.txt"
-#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
-#outDM="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/measures/"
+#origvcfD="/humgen/atgu1/fs03/wip/aganna/fin_seq/original/seq/G89387.vcf.gz"
+#metadataD="/seq/dax/G89387/WGS/v12/G89387.calling_metadata.txt"
+#outD="/humgen/atgu1/fs03/wip/aganna/BDS_exomes/results/plots/"
+#outDM="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/measures/G89387/"
 
 
 # Extracting list of sampel ID from .vcf
@@ -70,6 +70,8 @@ metad <- read.table(metadataD, sep="\t", header=T, stringsAsFactor=F)
 
 # Sample names have space, which is raplaced with _ #
 metad$sample_name <- sub(" ","_",metad$sample_name)
+studyname <- strsplit(basename(origvcfD),"\\.")[[1]][1]
+
 
 # Keep only metadata also in the vcf ##
 metads <- metad[metad$sample_name%in%d,]
@@ -81,9 +83,9 @@ bametrics=function(metads,i)
 	## Contamination ##
 	adress <- paste0(metads$dir[i],metads$sample_name[i],".selfSM")
 	ddt <- read.table(adress)
-	contamin <- ddt$V8
-	lik0 <- ddt$V9
-	lik1 <- ddt$V10
+	contamin <- ddt$V7
+	lik0 <- ddt$V8
+	lik1 <- ddt$V9
 
 	## Chimeras ##
 	adress2 <- paste0(metads$dir[i],metads$sample_name[i],".alignment_summary_metrics")
@@ -143,15 +145,8 @@ for(i in 1:length(bametricsR[5,]))
 }
 
 newdata1 <- data.frame(group=inssizels[,1],y=as.numeric(inssizels[,2]),x=as.numeric(inssizels[,3]))
-newdata1 <- newdata1[newdata1$x<600,]
+newdata1 <- newdata1[newdata1$x<1000,]
 meanins <- aggregate(newdata1$y,list(newdata1$x),median)
-
-# absolute maximum
-maxabs <- meanins$Group.1[which.max(meanins$x)]
-# Region where to search the realtive minimum
-regionofsearch <- meanins$x[meanins$Group.1>200 & meanins$Group.1 < maxabs]
-# Find the relative minumum
-breakpoint <- meanins$Group.1[meanins$x==min(regionofsearch)]-20
 
 # Identify max for each sample in the two regions separated by breakpoint
 MAXREL <- NULL
@@ -159,11 +154,9 @@ for(i in 1:length(bametricsR[5,]))
 {
 	seqT <- seq(1:length(bametricsR[5,i][[1]]))
 	val <- bametricsR[5,i][[1]]
-	max1 <- max(val[seqT < breakpoint])
-	max2 <- max(val[seqT > breakpoint])
+	max1 <- max(val)
 	seqmax1 <- seqT[val==max1]
-	seqmax2 <- seqT[val==max2]
-	MAXREL <- rbind(MAXREL,cbind(metads$sample_name[i],max1,max2,seqmax1,seqmax2))
+	MAXREL <- rbind(MAXREL,cbind(metads$sample_name[i],max1,seqmax1))
 }
 
 
@@ -188,14 +181,13 @@ dev.off()
 #dev.off()
 
 MAXREL <- data.frame(MAXREL,stringsAsFactors=F)
-MAXREL$dfmax1 <- abs(as.numeric(MAXREL$max1)- max(meanins$x[meanins$Group.1<breakpoint]))
-MAXREL$dfmax2 <- abs(as.numeric(MAXREL$max2)-max(meanins$x))	
+MAXREL$dfmax1 <- abs(as.numeric(MAXREL$max1)-max(meanins$x))	
 
-write.csv(MAXREL,file=paste0(outDM,"insertmaxdiff.csv"),row.names=F)
+write.csv(MAXREL,file=paste0(outDM,"insertmaxdiff",studyname,".csv"),row.names=F)
 
 
 ### PLOT % CHIMERIC ###
-newdata2 <- data.frame(y=chimeras,ID=metads$sample_name)
+newdata2 <- data.frame(y=chimeras*100,ID=metads$sample_name)
 #newdata2 <- newdata2[order(newdata2$y),]
 
 newdata2$ID[newdata2$ID!=newdata2$ID[which.max(newdata2$y)]] <- " "
@@ -224,7 +216,6 @@ dev.off()
 
 ### PLOT % CONTAMINATION ###
 newdata4 <- data.frame(y=contamin,ID=metads$sample_name, Coverage=meancoverage, loglik=lik1-lik0)
-
 newdata4$ID[newdata4$ID!=newdata4$ID[which.max(newdata4$y)]] <- " "
 
 #newdata4 <- newdata4[order(newdata4$mc),]

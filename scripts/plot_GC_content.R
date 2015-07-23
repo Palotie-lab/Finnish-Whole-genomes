@@ -51,8 +51,8 @@ outD1 = as.character(args[2])
 outD2= as.character(args[3])
 
 
-#inD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/gccontent/"
-#outD1="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
+#inD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/G89387/gccontent/"
+#outD1="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/G89387/"
 #outD2="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/measures/"
 
 # Extracting list of sampel ID from .vcf
@@ -102,9 +102,9 @@ newdata1$y <- as.numeric(newdata1$y)
 newdata2 <- data.frame(y=WINmean,x=1:101)
 
 png(paste0(outD1,"GC_content_distribution_by_sample.png"), width=800, height=800, type="cairo")
-p1 <- ggplot(aes(y=y,x=x),data=newdata1) + stat_smooth(aes(group=factor(group)), alpha=0.2, colour="red", se=F) + xlab("") +ylab("Fraction of normalized coverage (truncated at 2)")  + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm")) + xlim(c(1,90))
+p1 <- ggplot(aes(y=y,x=x),data=newdata1) + stat_smooth(aes(group=factor(group)), alpha=0.2, colour="red", se=F) + xlab("") +ylab("Fraction of normalized coverage")  + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), plot.margin=unit(c(0.5,0.5,-1,0.5), "cm")) + xlim(c(10,80))
 
-p2 <- ggplot(aes(y=y,x=x), data=newdata2) + geom_bar(stat="identity") + xlab("GC% of 100 base window") + ylab("Count") + ggtitle("") + theme( plot.margin=unit(c(-0.3,0.5,0.5,0), "cm")) + xlim(c(1,90))
+p2 <- ggplot(aes(y=y,x=x), data=newdata2) + geom_bar(stat="identity") + xlab("GC% of 100 base window (restricted to 20-80 range)") + ylab("Count") + ggtitle("") + theme( plot.margin=unit(c(-0.3,0.5,0.5,0), "cm")) + xlim(c(10,80))
 
 grid.arrange(p1, p2, heights=c(2/3, 1/3), ncol=1)
 dev.off()
@@ -127,4 +127,4 @@ dev.off()
 
 
 toexp <- data.frame(at=ATDROP,gc=GCDROP,id=gsub(".txt","",FILE))
-write.csv(toexp,paste0(outD2,"GC_measures.csv"), quote=F,row.names=F)
+write.csv(toexp,paste0(outD2,"GC_measures_G89387.csv"), quote=F,row.names=F)

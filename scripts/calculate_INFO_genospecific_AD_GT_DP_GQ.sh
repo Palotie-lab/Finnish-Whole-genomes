@@ -6,6 +6,8 @@
 ###             if nrow of the file is > 10M then 10M rows are sampled (true only for DP and GQ files). Also outputting samples names.
 
 source /home/unix/aganna/.my.bashrc
+source /broad/software/scripts/useuse
+use .zlib-1.2.8
 
 inD="$1"
 outD="$2"

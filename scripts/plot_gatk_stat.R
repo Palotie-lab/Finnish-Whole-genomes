@@ -54,11 +54,11 @@ inD2 = as.character(args[2])
 coveD= as.character(args[3])
 outD = as.character(args[4])
 
-#inD1="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/COUNT_gatkreport_G77318RH"
-#inD2="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/TITV_gatkreport_G77318RH"
-#coveD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/measures/meanmedcoverage.csv"
+#inD1="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/G89387/COUNT_gatkreport_G89387_PASS_NLC"
+#inD2="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/G89387/TITV_gatkreport_G89387_PASS_NLC"
+#coveD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/measures/G89387/meanmedcoverage.csv"
 
-#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
+#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/G89387/"
 
 # Read data (COUNT)
 d1 <- read.table(paste0(inD1,"_SNP_EX.txt"), header=T, stringsAsFactor=F)
@@ -126,8 +126,8 @@ newdata2DP <- newdata2DP[order(newdata2DP$mean), ]
 
 png(paste0(outD,"singeltons_by_sample.png"), width=800, height=800, type="cairo")
 
-p1 <- ggplot(aes(y = single, x=1:nrow(newdata1DP)), data=newdata1DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Singlentons") + ggtitle("N. Singletons - SNPs, EXOMES") + geom_text(aes(label=IDsing)) + scale_colour_gradient(low = "blue", high="red")
-p2 <- ggplot(aes(y = single, x=1:nrow(newdata2DP)), data=newdata2DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) + scale_colour_gradient(low = "blue", high="red") +xlab("Samples ordered by DP") + ylab("N. Singlentons") + ggtitle("N. Singletons - SNPs, WG") + geom_text(aes(label=IDsing))
+p1 <- ggplot(aes(y = single, x=1:nrow(newdata1DP)), data=newdata1DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) +xlab("Samples ordered by DP") + ylab("N. Singlentons") + ggtitle("N. Singletons - SNPs, EXOMES") + geom_text(aes(label=IDsing)) + scale_colour_gradient("Mean coverage",low = "blue", high="red")
+p2 <- ggplot(aes(y = single, x=1:nrow(newdata2DP)), data=newdata2DP) + geom_point(size=4,alpha=0.8,aes(color=mean)) + scale_colour_gradient("Mean coverage",low = "blue", high="red") +xlab("Samples ordered by DP") + ylab("N. Singlentons") + ggtitle("N. Singletons - SNPs, WG") + geom_text(aes(label=IDsing))
 
 multiplot(p1, p2, cols = 1)
 

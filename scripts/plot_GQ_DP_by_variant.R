@@ -49,10 +49,13 @@ inD1 = as.character(args[1])
 outD = as.character(args[2])
 NIND = as.numeric(args[3])
 
-#inD1="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/DP_GQ_MEAN_G77318RH"
-#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
+#inD1="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/G89387/DP_GQ_MEAN_G89387_PASS_NLC"
+#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/G89387/"
 #NIND=597
 
+#inD1="/home/unix/aganna/"
+
+#d1b <- fread(paste0(inD1,"DP_GQ_MEAN_G77318RH_SNP_EX_GQgt0.txt"), header=T, stringsAsFactor=F)
 
 print("Reading data")
 d1b <- fread(paste0(inD1,"_SNP_EX.txt"), header=T, stringsAsFactor=F)
@@ -115,23 +118,34 @@ multiplot(p1, p2, p3, p4, cols = 2)
 dev.off()
 
 
+#newdata1$cat <- cut(newdata1$DP,seq(1,100,10))
+#newdata2$cat <- cut(newdata2$DP,seq(1,100,10))
+#newdata3$cat <- cut(newdata3$DP,seq(1,100,10))
+#newdata4$cat <- cut(newdata4$DP,seq(1,100,10))
+
+
+#aggregate(newdata1$GQ,list(newdata1$cat,newdata1$group),function(x){c(mean(x),length(x))})
+#aggregate(newdata2$GQ,list(newdata2$cat,newdata2$group),function(x){c(mean(x),length(x))})
+#aggregate(newdata3$GQ,list(newdata3$cat,newdata3$group),function(x){c(mean(x),length(x))})
+#aggregate(newdata4$GQ,list(newdata4$cat,newdata4$group),function(x){c(mean(x),length(x))})
+
+#d1b[d1b$DP_HOMREF/d1b$N_HOMREF > 50, ]
+
+
+#bcftools query -r 2:905483 -f "[%GT %SAMPLE %AD %DP %GQ %PL\n]" G77318RH_SNP_EX_GQgt0.vcf
+
 png(paste0(outD,"DP_by_GQ_by_variant.png"), width=1200, height=800, type="cairo")
 
-p1 <- ggplot(data=newdata1,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 100") + ylab("DP - limited to 100") + ylim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - SNPs, EXOMES") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,100))
+p1 <- ggplot(data=newdata1,aes(y=GQ,x=DP)) + stat_binhex(colour="white",na.rm=TRUE, bin=50) + ylab("GQ - limited to 100") + xlab("DP - limited to 100") + xlim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - SNPs, EXOMES") + stat_smooth(aes(color=group),se = FALSE,lwd=3,span = 1) + ylim(c(0,100))
 
-p2 <- ggplot(data=newdata2,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 100") + ylab("DP - limited to 100") + ylim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - SNPs, WG") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,100))
+p2 <- ggplot(data=newdata2,aes(y=GQ,x=DP)) + stat_binhex(colour="white",na.rm=TRUE, bin=50) + ylab("GQ - limited to 100") + xlab("DP - limited to 100") + xlim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - SNPs, WG") + stat_smooth(aes(color=group),se = FALSE,lwd=3,span = 1) + ylim(c(0,100))
 
-p3 <- ggplot(data=newdata3,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 100") + ylab("DP - limited to 100") + ylim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - INDELs, EXOMES") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,100))
+p3 <- ggplot(data=newdata3,aes(y=GQ,x=DP)) + stat_binhex(colour="white",na.rm=TRUE, bin=50) + ylab("GQ - limited to 100") + xlab("DP - limited to 100") + xlim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - INDELs, EXOMES") + stat_smooth(aes(color=group),se = FALSE,lwd=3,span = 1) + ylim(c(0,100))
 
-p4 <- ggplot(data=newdata4,aes(x=GQ,y=DP)) + stat_binhex(colour="white",na.rm=TRUE) + xlab("GQ - limited to 100") + ylab("DP - limited to 100") + ylim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - INDELs, WG") + stat_smooth(se = FALSE,lwd=2,span = 1) + xlim(c(0,100))
+p4 <- ggplot(data=newdata4,aes(y=GQ,x=DP)) + stat_binhex(colour="white",na.rm=TRUE, bin=50) + ylab("GQ - limited to 100") + xlab("DP - limited to 100") + xlim(c(0,100)) + scale_fill_gradientn(colours=c("green1","red"),name = "Frequency",na.value=NA, trans = "log",guide=FALSE)+ theme_bw() + ggtitle("DP by GQ - INDELs, WG") + stat_smooth(aes(color=group),se = FALSE,lwd=3,span = 1) + ylim(c(0,100))
 
 
 multiplot(p1, p2, p3, p4, cols = 2)
 
 dev.off()
-
-
-
-
-
 

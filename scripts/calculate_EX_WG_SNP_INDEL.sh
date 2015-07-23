@@ -7,6 +7,9 @@
 
 
 source /home/unix/aganna/.my.bashrc
+source /broad/software/scripts/useuse
+use .zlib-1.2.8
+
 #use Bcftools
 #use Tabix
 
@@ -40,4 +43,4 @@ else
 fi
 
 bgzip $outD
-tabix $outD.gz
+tabix -f $outD.gz

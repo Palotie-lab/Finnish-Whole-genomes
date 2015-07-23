@@ -18,12 +18,12 @@ in2=sys.argv[2]
 in3=sys.argv[3]
 out=sys.argv[4]
 
-#in1='/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/DP_G77318RH_INDEL_EX.txt'
+#in1='/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/DP_G89387_INDEL_EX.txt'
 #in2='/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/GQ_G77318RH_INDEL_EX.txt'
 #in3='/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/samplenames_G77318RH_INDEL_EX.txt'
 #out='/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/'
 
-inlast = ("_").join(in1.split("_")[-2:])
+inlast = ("_").join(in1.split("_")[-3:])
 
 
 print "Loading DP values"
@@ -58,13 +58,17 @@ def GQGT20byDP(gq,dp):
         if (i % 100) == 0:
     	    print('Processing sample',i,'out of',len(gq1.loc[1,]))
     	    print strftime("%Y-%m-%d %H:%M:%S", gmtime())
-        for j in xrange(10,80):
+        for j in xrange(5,80,5):
     	    dflt = dptnm < j
-            dfgt = dptnm > j
+            dfgt = (dptnm < j) & (dptnm > j-5)
     	    newnlt = (tf & dflt).sum()
             newngt = (tf & dfgt).sum()
-            agglt.append(float(newnlt)/float(len(tf)))
-            agggt.append(float(newngt)/float(len(tf))) 
+            if dfgt.sum() == 0:
+                agglt.append('NA')
+                agggt.append('NA')
+            else:
+                agglt.append(float(newnlt)/float(len(tf)))
+                agggt.append(float(newngt)/float(dfgt.sum()))
                           
         Dagggt.append(agggt)
         Dagglt.append(agglt)

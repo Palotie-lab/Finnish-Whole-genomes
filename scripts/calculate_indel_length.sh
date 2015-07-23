@@ -5,6 +5,8 @@
 #  optional argument -n true can be used if you have already split-multiallelics! This is essential for the script to 
 #  work currently.
 ###
+source /broad/software/scripts/useuse
+use .zlib-1.2.8
 
 
 while getopts "f:n:o:" opt; do

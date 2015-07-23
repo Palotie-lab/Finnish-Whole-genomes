@@ -48,9 +48,9 @@ args <- commandArgs(trailingOnly = TRUE)
 inD = as.character(args[1])
 outD = as.character(args[2])
 
-#inD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/G77318RH"
-#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/"
-#NIND=597
+#inD="/humgen/atgu1/fs03/wip/aganna/fin_seq/processed/seq/temp/G89387/G89387_PASS_NLC"
+#outD="/humgen/atgu1/fs03/wip/aganna/fin_seq/results/plots/G89387/"
+
 
 
 print("Reading data")
@@ -102,17 +102,20 @@ newdata4bd$IDM[newdata4bd$IDM!=newdata4bd$IDM[which.max(newdata4bd$MISSI)]] <- "
 
 
 print("Now plotting")
+newdata1acP <- newdata1ac[log10(newdata1ac$HWE) > -100,]
+newdata2acP <- newdata2ac[log10(newdata2ac$HWE) > -100,]
+newdata3acP <- newdata3ac[log10(newdata3ac$HWE) > -100,]
+newdata4acP <- newdata4ac[log10(newdata4ac$HWE) > -100,]
 
 png(paste0(outD,"HWE_by_variant.png"), width=1200, height=800, type="cairo")
 
-p1 <- ggplot(aes(x = HWE), data=newdata1ac) + 
-    geom_bar(aes(y = (..count..)/sum(..count..))) + ylab("Proportion") + xlab("HWE P-value") + ggtitle(paste0("Hardy-Weinberg P-value per variant - SNPs, EXOMES \n N.of variants with P-value < 10^6=",sum(newdata1ac$HWE<0.000001), "(",round(sum(newdata1ac$HWE<0.000001)/length(newdata1ac$HWE),2),"%)")) + scale_x_log10() 
+p1 <- ggplot(aes(x = log10(HWE)), data=newdata1acP) +  geom_histogram() + ylab("Proportion") + xlab("Log10 HWE P-value (truncated to -100)") + ggtitle(paste0("Hardy-Weinberg P-value per variant - SNPs, EXOMES \n N.of variants with P-value < 10^6=",sum(newdata1ac$HWE<0.000001), "(",round(sum(newdata1ac$HWE<0.000001)/length(newdata1ac$HWE),2),"%)"))  
 
-p2 <- ggplot(aes(x = HWE), data=newdata2ac) +  geom_bar(aes(y = (..count..)/sum(..count..))) +ylab("Proportion") + xlab("HWE P-value") + ggtitle(paste0("Hardy-Weinberg P-value per variant - SNPs, WG \n N.of variants with P-value < 10^6=",sum(newdata2ac$HWE<0.000001), "(",round(sum(newdata2ac$HWE<0.000001)/length(newdata2ac$HWE),2),"%)")) + scale_x_log10() 
+p2 <- ggplot(aes(x = log10(HWE)), data=newdata2acP) +  geom_histogram() + ylab("Proportion") + xlab("Log10 HWE P-value (truncated to -100)") + ggtitle(paste0("Hardy-Weinberg P-value per variant - SNPs, WG \n N.of variants with P-value < 10^6=",sum(newdata2ac$HWE<0.000001), "(",round(sum(newdata2ac$HWE<0.000001)/length(newdata2ac$HWE),2),"%)")) 
 
-p3 <- ggplot(aes(x = HWE), data=newdata3ac) +  geom_bar(aes(y = (..count..)/sum(..count..))) +ylab("Proportion") + xlab("HWE P-value") + ggtitle(paste0("Hardy-Weinberg P-value per variant - INDELs, EXOMES \n N.of variants with P-value < 10^6=",sum(newdata3ac$HWE<0.000001), "(",round(sum(newdata3ac$HWE<0.000001)/length(newdata3ac$HWE),2),"%)")) + scale_x_log10() 
+p3 <- ggplot(aes(x = log10(HWE)), data=newdata3acP) +  geom_histogram() + ylab("Proportion") + xlab("Log10 HWE P-value (truncated to -100)") + ggtitle(paste0("Hardy-Weinberg P-value per variant - INDELs, EXOMES \n N.of variants with P-value < 10^6=",sum(newdata3ac$HWE<0.000001), "(",round(sum(newdata3ac$HWE<0.000001)/length(newdata3ac$HWE),2),"%)")) 
 
-p4 <- ggplot(aes(x = HWE), data=newdata4ac) +  geom_bar(aes(y = (..count..)/sum(..count..))) +ylab("Proportion") + xlab("HWE P-value") + ggtitle(paste0("Hardy-Weinberg P-value per variant - INDELs, WG \n N.of variants with P-value < 10^6=",sum(newdata4ac$HWE<0.000001), "(",round(sum(newdata4ac$HWE<0.000001)/length(newdata4ac$HWE),2),"%)")) + scale_x_log10() 
+p4 <- ggplot(aes(x = log10(HWE)), data=newdata4acP) +  geom_histogram() + ylab("Proportion") + xlab("Log10 HWE P-value (truncated to -100)") + ggtitle(paste0("Hardy-Weinberg P-value per variant - INDELs, WG \n N.of variants with P-value < 10^6=",sum(newdata4ac$HWE<0.000001), "(",round(sum(newdata4ac$HWE<0.000001)/length(newdata4ac$HWE),2),"%)")) 
 
 multiplot(p1, p2, p3, p4, cols = 2)
 
