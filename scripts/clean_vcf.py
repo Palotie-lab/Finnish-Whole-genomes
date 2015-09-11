@@ -10,7 +10,7 @@ import sys
 #import line_profiler
 
 def file_len(file):
-    with gzip.open(file, 'r') as f:
+    with gzip.open(file) if args.vcf.endswith('.gz') else open(file) as f:
         data_lines = 0
         for line in f:
             if line[0] != "#":
@@ -103,7 +103,7 @@ def main(args):
             gt_countAD = 0
             gt_countDP = 0
 
-            newfield = np.empty(nsamp, dtype=np.dtype('a800'))
+            newfield = [None] * nsamp
 
             for ind, sample_field in enumerate(fields[fmt_index+1:]):
                 sample_split = sample_field.split(":")
